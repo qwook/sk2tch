@@ -6,7 +6,7 @@ I originally had a massive React website that held every single one of my
 creative coding sketches. One of the sketches named "horror" eventually became
 "last seen online."
 
-I decided to pull out and open source all the common functions I use, as well as
+I'm pulling out and open sourcing all the common functions I use, as well as
 slowly convert it over to Typescript.
 
 It'll be sketches 2, or "sk2tch".
