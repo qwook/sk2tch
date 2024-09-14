@@ -5,7 +5,7 @@
  * outside a THREE.js component.
  */
 
-import customEvents from "../../games/horror/CustomEvents";
+import customEvents from "./customEvents";
 import { RenderCallback, useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 
