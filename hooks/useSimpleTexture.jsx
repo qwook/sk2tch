@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-import RetriableTextureLoader from "../horror/RetriableTextureLoader";
+import RetriableTextureLoader from "sk2tch/graphics/RetriableTextureLoader";
 import { useEffect } from "react";
 import { useLoader } from "@react-three/fiber";
 
