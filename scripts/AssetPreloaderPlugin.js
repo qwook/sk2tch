@@ -7,6 +7,8 @@
  * Helps cut out any "loading" menu.
  */
 
+// TODO: Can we figure out how to bundle this instead?
+
 const fs = require("fs");
 const path = require("path");
 const webpack = require("webpack");
@@ -16,7 +18,7 @@ const preloader = fs.readFileSync(templatePath, "utf8");
 
 class AssetPreloaderPlugin {
   apply(compiler) {
-    compiler.hooks.compilation.tap("InjectAssetsPlugin", (compilation) => {
+    compiler.hooks.thisCompilation.tap("InjectAssetsPlugin", (compilation) => {
       compilation.hooks.processAssets.tap(
         {
           name: "InjectAssetsPlugin",
@@ -45,7 +47,8 @@ class AssetPreloaderPlugin {
               "assets.js",
               new webpack.sources.CachedSource(
                 new webpack.sources.RawSource(injectedCode, false)
-              )
+              ),
+              {}
             );
           }
 
@@ -60,6 +63,16 @@ class AssetPreloaderPlugin {
         }
       );
     });
+    // Detect HMR and update assets only during hot updates
+    compiler.hooks.invalid.tap(
+      "MyCustomWebpackPlugin",
+      (filename, changeTime) => {
+        console.log(
+          `Hot Reload detected. File changed: ${filename} at ${changeTime}`
+        );
+        // You can trigger asset updates here if needed, or handle more custom logic
+      }
+    );
   }
 }
 
