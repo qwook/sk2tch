@@ -1,7 +1,7 @@
 import { createContext, useEffect, useState } from "react";
 
 // TODO: Decouple cheat system.
-import { IGNORE_SAVE } from "../../games/horror/sv_cheats";
+import { IGNORE_SAVE } from "../../games/horror/src/sv_cheats";
 
 let saveState =
   typeof window !== "undefined" && window.electronAPI

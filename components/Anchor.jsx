@@ -1,4 +1,4 @@
-import { STANDALONE_APP } from "../../games/horror/sv_cheats";
+import { STANDALONE_APP } from "../../games/horror/src/sv_cheats";
 
 export default function Anchor({ href, children, ...props }) {
   return STANDALONE_APP ? (
