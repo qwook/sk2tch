@@ -64,7 +64,10 @@ module.exports = {
           loader: "ts-loader", // Use ts-loader for TypeScript files
           options: {
             getCustomTransformers: () => ({
-              before: [ReactRefreshTypeScript()],
+              before:
+                process.env.NODE_ENV === "development"
+                  ? [ReactRefreshTypeScript()]
+                  : [],
             }),
             transpileOnly: true,
             configFile: "tsconfig.json",
@@ -76,7 +79,7 @@ module.exports = {
         use: ["style-loader", "css-loader"],
       },
       {
-        test: /\.(png|jpg|jpeg|gif|svg|mp4|ttf|otf|jsonc)$/, // Images
+        test: /\.(png|jpg|jpeg|gif|svg|mp3|mp4|ttf|otf|jsonc)$/, // Images
         type: "asset/resource", // For Webpack 5+
       },
       {
@@ -110,7 +113,9 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: "./src/sk2tch/index.html",
     }),
-    new ReactRefreshWebpackPlugin(),
+    ...(process.env.NODE_ENV === "development"
+      ? [new ReactRefreshWebpackPlugin()]
+      : []),
     // ...(process.env.NODE_ENV === "production"
     //   ? [
     //       new CopyWebpackPlugin({

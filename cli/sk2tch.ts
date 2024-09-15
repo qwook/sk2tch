@@ -89,8 +89,11 @@ yargs(hideBin(process.argv))
       let webpackTargetPath = "";
       if (argv.target === "osx") {
         webpackTargetPath = "../scripts/webpack/webpack.electron.cjs";
+        shell.env["TARGET"] = "electron";
+        shell.env["NODE_ENV"] = "production";
       } else if (argv.target === "web") {
         webpackTargetPath = "../scripts/webpack/webpack.web.cjs";
+        shell.env["NODE_ENV"] = "development";
       }
 
       const webpackPath = path.join(__dirname, webpackTargetPath);
@@ -98,7 +101,7 @@ yargs(hideBin(process.argv))
       console.log("Starting development server...");
       shell.env["SK2TCH_CONFIG"] = JSON.stringify(config);
       const webpack = shell.exec(
-        `NODE_ENV=development npx webpack --color --config=${webpackPath}`,
+        `npx webpack --color --config=${webpackPath}`,
         {
           async: true,
         }
