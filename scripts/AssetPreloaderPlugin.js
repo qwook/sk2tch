@@ -63,16 +63,6 @@ class AssetPreloaderPlugin {
         }
       );
     });
-    // Detect HMR and update assets only during hot updates
-    compiler.hooks.invalid.tap(
-      "MyCustomWebpackPlugin",
-      (filename, changeTime) => {
-        console.log(
-          `Hot Reload detected. File changed: ${filename} at ${changeTime}`
-        );
-        // You can trigger asset updates here if needed, or handle more custom logic
-      }
-    );
   }
 }
 

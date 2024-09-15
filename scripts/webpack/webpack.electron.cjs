@@ -5,8 +5,6 @@ const ZipPlugin = require("zip-webpack-plugin");
 const path = require("path");
 const sk2tchConfig = JSON.parse(process.env["SK2TCH_CONFIG"]);
 
-console.log(sk2tchConfig.entry);
-
 module.exports = merge(common, {
   output: {
     path: path.join(sk2tchConfig.output, "electron", "game"),

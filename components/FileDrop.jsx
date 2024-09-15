@@ -11,13 +11,11 @@ export function DragAndDrop({ onDropJsonFile }) {
           : dt.types.contains("Files"))
       ) {
         e.preventDefault();
-        console.log(dt.types);
       }
     };
     document.addEventListener("dragover", dragover);
 
     const drop = async (e) => {
-      console.log(e);
       e.preventDefault();
 
       if (e.dataTransfer.items && e.dataTransfer.items.length === 1) {
@@ -27,15 +25,12 @@ export function DragAndDrop({ onDropJsonFile }) {
         if (item.kind === "file") {
           const file = item.getAsFile();
           if (file.name.endsWith(".jsonc")) {
-            console.log(await file.text());
             onDropJsonFile(await file.text());
           }
         }
       } else if (e.dataTransfer.files && e.dataTransfer.files.length === 1) {
         const file = e.dataTransfer.files[0];
-        console.log(file.name);
         if (file.name.endsWith(".jsonc")) {
-          console.log(await file.text());
           onDropJsonFile(await file.text());
         }
       }

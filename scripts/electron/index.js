@@ -15,7 +15,6 @@ const cloudEnabled =
   client?.cloud.writeFile("check.sav", (Math.random() * 100000).toString());
 
 let appPath = app.getPath("userData");
-console.log(appPath);
 
 if (process.env.NODE_ENV !== "development") {
   Menu.setApplicationMenu(null);
