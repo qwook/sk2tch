@@ -6,6 +6,7 @@ const assets = require("./assets.json");
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 const ReactRefreshTypeScript = require("react-refresh-typescript");
 const AssetPreloaderPlugin = require("../AssetPreloaderPlugin");
+const TerserPlugin = require("terser-webpack-plugin");
 
 const { DefinePlugin, ProvidePlugin } = webpack;
 
@@ -14,7 +15,9 @@ const sk2tchConfig = JSON.parse(process.env["SK2TCH_CONFIG"]);
 module.exports = {
   mode: process.env.NODE_ENV,
   entry: { bundle: sk2tchConfig.entry }, // Change this to your main TypeScript file
-  devtool: "inline-source-map",
+  ...(process.env.NODE_ENV === "development"
+    ? { devtool: "inline-source-map" }
+    : {}),
   output: {
     path: path.join(sk2tchConfig.output, "game"),
     filename: "[name].js",
@@ -54,6 +57,23 @@ module.exports = {
         },
       },
     },
+    ...(process.env.NODE_ENV === "production"
+      ? {
+          minimize: true, // Enable minification (enabled by default in 'production' mode)
+          minimizer: [
+            new TerserPlugin({
+              terserOptions: {
+                compress: {
+                  drop_console: true, // Remove console logs
+                },
+                output: {
+                  comments: false, // Remove comments
+                },
+              },
+            }),
+          ],
+        }
+      : {}),
   },
   module: {
     rules: [
@@ -116,21 +136,6 @@ module.exports = {
     ...(process.env.NODE_ENV === "development"
       ? [new ReactRefreshWebpackPlugin()]
       : []),
-    // ...(process.env.NODE_ENV === "production"
-    //   ? [
-    //       new CopyWebpackPlugin({
-    //         patterns: assets.map((asset) => ({
-    //           from: path.join("./public", asset),
-    //           to: asset,
-    //           force: true,
-    //         })),
-    //       }),
-    //       new ZipPlugin({
-    //         path: "../zip",
-    //         filename: "release.zip",
-    //       }),
-    //     ]
-    //   : []),
   ],
   devServer: {
     port: 9000,
