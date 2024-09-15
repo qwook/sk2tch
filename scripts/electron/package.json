@@ -1,0 +1,19 @@
+{
+  "name": "lastseenonline",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mkdirp": "^3.0.1",
+    "steamworks.js": "^0.3.1"
+  },
+  "devDependencies": {
+    "electron": "^28.2.3"
+  }
+}

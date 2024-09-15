@@ -1,6 +1,7 @@
 export interface Sk2tchConfig {
   name: string;
   entry: string;
+  output: string;
 
   analytics?: {
     googleTag: string;

@@ -42,10 +42,15 @@ export const l10n = {
     return currentLanguageFileProxy;
   },
   loadFallbackLanguageFile: async (path) => {
-    l10n.loadFallbackLanguageText(await (await fetch(path)).text());
+    try {
+      l10n.loadFallbackLanguageText(await (await fetch(path)).text());
+    } catch (e) {
+      throw Error(`Error parsing language file: ${path}`);
+    }
   },
   loadFallbackLanguageText: async (text) => {
     let languageFile = JSON.parse(stripJsonComments(text));
+
     // eslint-disable-next-line no-eval
     // languageFile = eval(languageFile + ";text;");
     // Replace all values with FormattableString:

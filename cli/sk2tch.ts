@@ -1,9 +1,21 @@
 #!/usr/bin/env ts-node
 
+import { Sk2tchConfig } from "./sk2tch.config";
+
 const path = require("path");
 const yargs = require("yargs");
 const { hideBin } = require("yargs/helpers");
 const shell = require("shelljs");
+
+async function getConfig(
+  relativePath: string,
+  configPath: string
+): Promise<Sk2tchConfig> {
+  const { default: config } = await import(configPath);
+  config.entry = path.join(relativePath, config.entry);
+  config.output = path.join(relativePath, config.output);
+  return config;
+}
 
 // Define your commands
 yargs(hideBin(process.argv))
@@ -21,15 +33,15 @@ yargs(hideBin(process.argv))
       const resolvedPath = path.resolve(argv.path as string);
 
       // Try to find the sk2tch config file.
-      const configPath = path.join(resolvedPath, "sk2tch.config.ts");
-      const { default: config } = await import(configPath);
+      const config = await getConfig(
+        resolvedPath,
+        path.join(resolvedPath, "sk2tch.config.ts")
+      );
 
       const webpackPath = path.join(
         __dirname,
-        "../scripts/webpack/webpack.config.cjs"
+        "../scripts/webpack/webpack.common.cjs"
       );
-
-      config.entry = path.join(resolvedPath, config.entry);
 
       console.log("Starting development server...");
       shell.env["SK2TCH_CONFIG"] = JSON.stringify(config);
@@ -48,20 +60,57 @@ yargs(hideBin(process.argv))
     }
   )
   .command(
-    "build [target]",
+    "build [target] [path]",
     "Build the project for a specific target (web, osx, win)",
     (yargs) => {
-      return yargs.positional("target", {
-        describe: "The build target (web, osx, win)",
-        choices: ["web", "osx", "win"],
-        demandOption: true,
-      });
+      yargs
+        .positional("target", {
+          describe: "The build target (web, osx, win)",
+          choices: ["web", "osx", "win"],
+          demandOption: true,
+        })
+        .positional("path", {
+          describe: "The path to start the dev server in",
+          default: ".",
+          type: "string",
+        });
     },
-    (argv) => {
+    async (argv) => {
       console.log(`Building for ${argv.target}...`);
       console.error("Not implemented!");
-      // Add your build logic for web, osx, or win here
+      const resolvedPath = path.resolve(argv.path as string);
+
+      // Try to find the sk2tch config file.
+      const config = await getConfig(
+        resolvedPath,
+        path.join(resolvedPath, "sk2tch.config.ts")
+      );
+
+      let webpackTargetPath = "";
+      if (argv.target === "osx") {
+        webpackTargetPath = "../scripts/webpack/webpack.electron.cjs";
+      } else if (argv.target === "web") {
+        webpackTargetPath = "../scripts/webpack/webpack.web.cjs";
+      }
+
+      const webpackPath = path.join(__dirname, webpackTargetPath);
+
+      console.log("Starting development server...");
+      shell.env["SK2TCH_CONFIG"] = JSON.stringify(config);
+      const webpack = shell.exec(
+        `NODE_ENV=development npx webpack --color --config=${webpackPath}`,
+        {
+          async: true,
+        }
+      );
+      webpack.stdout.on("data", (data) => {
+        process.stdout.write(data);
+      });
+      webpack.stderr.on("data", (data) => {
+        process.stderr.write(data);
+      });
     }
+    // Add your build logic for web, osx, or win here
   )
   .command(
     "publish [platform]",

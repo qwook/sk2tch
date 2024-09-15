@@ -1,7 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const ZipPlugin = require("zip-webpack-plugin");
 const webpack = require("webpack");
 const assets = require("./assets.json");
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
@@ -17,7 +16,7 @@ module.exports = {
   entry: { bundle: sk2tchConfig.entry }, // Change this to your main TypeScript file
   devtool: "inline-source-map",
   output: {
-    path: path.resolve(__dirname, "dist"),
+    path: path.join(sk2tchConfig.output, "game"),
     filename: "[name].js",
   },
   optimization: {
@@ -112,24 +111,27 @@ module.exports = {
       template: "./src/sk2tch/index.html",
     }),
     new ReactRefreshWebpackPlugin(),
-    ...(process.env.NODE_ENV === "production"
-      ? [
-          new CopyWebpackPlugin({
-            patterns: assets.map((asset) => ({
-              from: path.join("./public", asset),
-              to: asset,
-              force: true,
-            })),
-          }),
-          new ZipPlugin({
-            path: "../zip",
-            filename: "release.zip",
-          }),
-        ]
-      : []),
+    // ...(process.env.NODE_ENV === "production"
+    //   ? [
+    //       new CopyWebpackPlugin({
+    //         patterns: assets.map((asset) => ({
+    //           from: path.join("./public", asset),
+    //           to: asset,
+    //           force: true,
+    //         })),
+    //       }),
+    //       new ZipPlugin({
+    //         path: "../zip",
+    //         filename: "release.zip",
+    //       }),
+    //     ]
+    //   : []),
   ],
   devServer: {
     port: 9000,
     hot: true,
+    static: {
+      directory: path.join(__dirname, "public_"),
+    },
   },
 };
