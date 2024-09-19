@@ -24,14 +24,14 @@ Object.keys(sk2tchConfig.pages || {}).forEach(
   (name) =>
     (pages[name] = [
       sk2tchConfig.pages[name],
-      webpackHotMiddleware + "?name=" + name,
+      webpackHotMiddleware,
     ])
 );
 
 module.exports = {
   mode: process.env.NODE_ENV,
   entry: {
-    bundle: [sk2tchConfig.entry, webpackHotMiddleware + "?name=bundle"], //, webpackHotMiddleware + "?name=bundle"],
+    bundle: [sk2tchConfig.entry, webpackHotMiddleware], //, webpackHotMiddleware + "?name=bundle"],
     ...pages,
   }, // Change this to your main TypeScript file
   ...(process.env.NODE_ENV === "development"

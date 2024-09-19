@@ -67,12 +67,14 @@ yargs(hideBin(process.argv))
           }
         );
       }
-      webpack.stdout.on("data", (data) => {
-        process.stdout.write(data);
-      });
-      webpack.stderr.on("data", (data) => {
-        process.stderr.write(data);
-      });
+      if (!config.server) {
+        webpack.stdout.on("data", (data) => {
+          process.stdout.write(data);
+        });
+        webpack.stderr.on("data", (data) => {
+          process.stderr.write(data);
+        });
+      }
     }
   )
   .command(
