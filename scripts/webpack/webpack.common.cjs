@@ -7,14 +7,33 @@ const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin"
 const ReactRefreshTypeScript = require("react-refresh-typescript");
 const AssetPreloaderPlugin = require("../AssetPreloaderPlugin");
 const TerserPlugin = require("terser-webpack-plugin");
+const { HotModuleReplacementPlugin } = require("webpack");
 
 const { DefinePlugin, ProvidePlugin } = webpack;
 
 const sk2tchConfig = JSON.parse(process.env["SK2TCH_CONFIG"]);
 
+const webpackHotMiddleware = path.resolve(
+  __dirname,
+  "../../node_modules/webpack-hot-middleware/client"
+);
+
+let pages = {};
+
+Object.keys(sk2tchConfig.pages || {}).forEach(
+  (name) =>
+    (pages[name] = [
+      sk2tchConfig.pages[name],
+      webpackHotMiddleware + "?name=" + name,
+    ])
+);
+
 module.exports = {
   mode: process.env.NODE_ENV,
-  entry: { bundle: sk2tchConfig.entry }, // Change this to your main TypeScript file
+  entry: {
+    bundle: [sk2tchConfig.entry, webpackHotMiddleware + "?name=bundle"], //, webpackHotMiddleware + "?name=bundle"],
+    ...pages,
+  }, // Change this to your main TypeScript file
   ...(process.env.NODE_ENV === "development"
     ? { devtool: "inline-source-map" }
     : {}),
@@ -99,7 +118,15 @@ module.exports = {
         use: ["style-loader", "css-loader"],
       },
       {
-        test: /\.(png|jpg|jpeg|gif|svg|mp3|mp4|ttf|otf|jsonc)$/, // Images
+        test: /\.scss$/,
+        use: [
+          "style-loader",
+          "css-loader",
+          "sass-loader", // Compiles SCSS to CSS
+        ],
+      },
+      {
+        test: /\.(png|jpg|jpeg|gif|svg|mp3|mp4|webm|ttf|otf|jsonc)$/, // Images
         type: "asset/resource", // For Webpack 5+
       },
       {
@@ -127,15 +154,28 @@ module.exports = {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
         TARGET: JSON.stringify(process.env.TARGET),
         DEBUG: JSON.stringify(process.env.DEBUG),
-        GTAG: JSON.stringify(sk2tchConfig.analytics.googleTag),
+        GTAG: JSON.stringify(sk2tchConfig.analytics?.googleTag || ""),
       },
     }),
     new HtmlWebpackPlugin({
-      template: "./src/sk2tch/index.html",
+      template: path.resolve(__dirname, "../../index.html"),
+      chunks: ["bundle"],
     }),
+    ...Object.keys(sk2tchConfig.pages || {}).map(
+      (name) =>
+        new HtmlWebpackPlugin({
+          filename: `${name}/index.html`,
+          template: path.resolve(__dirname, "../../index.html"),
+          chunks: [name],
+        })
+    ),
     ...(process.env.NODE_ENV === "development"
-      ? [new ReactRefreshWebpackPlugin()]
-      : []),
+      ? [
+          new ReactRefreshWebpackPlugin(),
+          sk2tchConfig.server && new HotModuleReplacementPlugin(),
+        ]
+      : []
+    ).filter((plugin) => !!plugin),
   ],
   devServer: {
     port: 9000,

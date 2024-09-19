@@ -1,7 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-
-// TODO: Decouple cheat system.
-import { IGNORE_SAVE } from "../../games/horror/src/sv_cheats";
+import cheats from "./cheats";
 
 let saveState =
   typeof window !== "undefined" && window.electronAPI
@@ -24,7 +22,7 @@ export function useSaveState(
   postProcessLoad = (data) => data,
   postProcessSave = (data) => data
 ) {
-  if (IGNORE_SAVE) {
+  if (cheats.IGNORE_SAVE) {
     saveState[name] = initialState;
   }
   const [state, setState] = useState(
@@ -34,7 +32,7 @@ export function useSaveState(
   );
   useEffect(() => {
     saveState[name] = postProcessSave(state);
-    if (!IGNORE_SAVE) {
+    if (!cheats.IGNORE_SAVE) {
       save();
     }
   }, [name, state, postProcessSave]);

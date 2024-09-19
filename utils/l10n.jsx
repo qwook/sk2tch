@@ -74,7 +74,13 @@ export const l10n = {
     l10n.loadLanguageText(await (await fetch(path)).text());
   },
   loadLanguageText: (text) => {
-    let languageFile = JSON.parse(stripJsonComments(text));
+    let languageFile;
+    try {
+      languageFile = JSON.parse(stripJsonComments(text));
+    } catch (e) {
+      console.log("Error loading language.");
+      return;
+    }
     // eslint-disable-next-line no-eval
     // languageFile = eval(languageFile + ";text;");
     // Replace all values with FormattableString:

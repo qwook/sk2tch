@@ -14,6 +14,12 @@ async function getConfig(
   const { default: config } = await import(configPath);
   config.entry = path.join(relativePath, config.entry);
   config.output = path.join(relativePath, config.output);
+
+  if (config.pages) {
+    for (const name in config.pages) {
+      config.pages[name] = path.join(relativePath, config.pages[name]);
+    }
+  }
   return config;
 }
 
@@ -43,14 +49,23 @@ yargs(hideBin(process.argv))
         "../scripts/webpack/webpack.common.cjs"
       );
 
+      config.server = config.server && path.join(resolvedPath, config.server);
+
       console.log("Starting development server...");
       shell.env["SK2TCH_CONFIG"] = JSON.stringify(config);
-      const webpack = shell.exec(
-        `NODE_ENV=development npx webpack --color serve --config=${webpackPath}`,
-        {
+      let webpack;
+      if (config.server) {
+        webpack = shell.exec(`NODE_ENV=development npx tsx ${config.server}`, {
           async: true,
-        }
-      );
+        });
+      } else {
+        webpack = shell.exec(
+          `NODE_ENV=development npx webpack --color serve --config=${webpackPath}`,
+          {
+            async: true,
+          }
+        );
+      }
       webpack.stdout.on("data", (data) => {
         process.stdout.write(data);
       });
@@ -93,7 +108,7 @@ yargs(hideBin(process.argv))
         shell.env["NODE_ENV"] = "production";
       } else if (argv.target === "web") {
         webpackTargetPath = "../scripts/webpack/webpack.web.cjs";
-        shell.env["NODE_ENV"] = "development";
+        shell.env["NODE_ENV"] = "production";
       }
 
       const webpackPath = path.join(__dirname, webpackTargetPath);

@@ -3,6 +3,12 @@ export interface Sk2tchConfig {
   entry: string;
   output: string;
 
+  // Used if this sketch has it's own hosted server.
+  server?: string;
+  pages?: {
+    [page: string]: string;
+  };
+
   analytics?: {
     googleTag: string;
   };
