@@ -54,6 +54,7 @@ yargs(hideBin(process.argv))
       console.log("Starting development server...");
       shell.env["SK2TCH_CONFIG"] = JSON.stringify(config);
       let webpack;
+      shell.cd(path.resolve(__dirname, ".."));
       if (config.server) {
         webpack = shell.exec(`NODE_ENV=development npx tsx ${config.server}`, {
           async: true,

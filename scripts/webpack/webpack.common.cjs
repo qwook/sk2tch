@@ -136,6 +136,7 @@ module.exports = {
     ],
   },
   resolve: {
+    modules: [path.resolve(__dirname, "node_modules"), "node_modules"],
     extensions: [".ts", ".tsx", ".js", ".jsx"], // Add TypeScript file extensions
     fallback: {
       stream: require.resolve("stream-browserify"),
