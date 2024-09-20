@@ -1,4 +1,3 @@
-import webpack from "webpack";
 import express from "express";
 import { createServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
@@ -13,6 +12,7 @@ export default function serverBoilerplate(defaultPort) {
   const io = new SocketIOServer(server);
 
   if (process.env.NODE_ENV === "development") {
+    const webpack = require("webpack");
     const webpackConfig = require("sk2tch/scripts/webpack/webpack.common.cjs");
     const middleware = require("webpack-dev-middleware");
     const hotMiddleware = require("webpack-hot-middleware");
