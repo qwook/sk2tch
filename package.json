@@ -61,7 +61,6 @@
     "react": "^18.2.0",
     "react-device-detect": "^2.2.3",
     "react-dom": "^18.2.0",
-    "react-p5": "^1.4.1",
     "screenfull": "^6.0.2",
     "seedrandom": "^3.0.5",
     "steamworks.js": "^0.3.1",
