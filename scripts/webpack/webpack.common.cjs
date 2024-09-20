@@ -8,24 +8,28 @@ const ReactRefreshTypeScript = require("react-refresh-typescript");
 const AssetPreloaderPlugin = require("../AssetPreloaderPlugin");
 const TerserPlugin = require("terser-webpack-plugin");
 const { HotModuleReplacementPlugin } = require("webpack");
+const fs = require("fs");
 
 const { DefinePlugin, ProvidePlugin } = webpack;
 
 const sk2tchConfig = JSON.parse(process.env["SK2TCH_CONFIG"]);
 
-const webpackHotMiddleware = path.resolve(
+let webpackHotMiddleware = path.resolve(
   __dirname,
   "../../node_modules/webpack-hot-middleware/client"
 );
 
+if (!fs.existsSync(webpackHotMiddleware)) {
+  webpackHotMiddleware = path.resolve(
+    __dirname,
+    "../../../webpack-hot-middleware/client"
+  );
+}
+
 let pages = {};
 
 Object.keys(sk2tchConfig.pages || {}).forEach(
-  (name) =>
-    (pages[name] = [
-      sk2tchConfig.pages[name],
-      webpackHotMiddleware,
-    ])
+  (name) => (pages[name] = [sk2tchConfig.pages[name], webpackHotMiddleware])
 );
 
 module.exports = {
