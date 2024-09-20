@@ -19,13 +19,20 @@ let webpackHotMiddleware = "webpack-hot-middleware/client";
 let pages = {};
 
 Object.keys(sk2tchConfig.pages || {}).forEach(
-  (name) => (pages[name] = [sk2tchConfig.pages[name], webpackHotMiddleware])
+  (name) =>
+    (pages[name] = [
+      sk2tchConfig.pages[name],
+      ...(process.env.NODE_ENV === "development" ? [webpackHotMiddleware] : []),
+    ])
 );
 
 module.exports = {
   mode: process.env.NODE_ENV,
   entry: {
-    bundle: [sk2tchConfig.entry, webpackHotMiddleware], //, webpackHotMiddleware + "?name=bundle"],
+    bundle: [
+      sk2tchConfig.entry,
+      ...(process.env.NODE_ENV === "development" ? [webpackHotMiddleware] : []),
+    ], //, webpackHotMiddleware + "?name=bundle"],
     ...pages,
   }, // Change this to your main TypeScript file
   ...(process.env.NODE_ENV === "development"
@@ -178,11 +185,15 @@ module.exports = {
       : []
     ).filter((plugin) => !!plugin),
   ],
-  devServer: {
-    port: 9000,
-    hot: true,
-    static: {
-      directory: path.join(__dirname, "public_"),
-    },
-  },
+  ...(process.env.NODE_ENV === "development"
+    ? {
+        devServer: {
+          port: 9000,
+          hot: true,
+          static: {
+            directory: path.join(__dirname, "public_"),
+          },
+        },
+      }
+    : {}),
 };

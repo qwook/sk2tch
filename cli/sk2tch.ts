@@ -14,6 +14,7 @@ async function getConfig(
   const { default: config } = await import(configPath);
   config.entry = path.join(relativePath, config.entry);
   config.output = path.join(relativePath, config.output);
+  config.server = config.server && path.join(relativePath, config.server);
 
   if (config.pages) {
     for (const name in config.pages) {
@@ -49,8 +50,6 @@ yargs(hideBin(process.argv))
         "../scripts/webpack/webpack.common.cjs"
       );
 
-      config.server = config.server && path.join(resolvedPath, config.server);
-
       console.log("Starting development server...");
       shell.env["SK2TCH_CONFIG"] = JSON.stringify(config);
       let webpack;
@@ -84,7 +83,7 @@ yargs(hideBin(process.argv))
       yargs
         .positional("target", {
           describe: "The build target (web, osx, win)",
-          choices: ["web", "osx", "win"],
+          choices: ["web", "osx", "win", "app"],
           demandOption: true,
         })
         .positional("path", {
@@ -104,32 +103,40 @@ yargs(hideBin(process.argv))
         path.join(resolvedPath, "sk2tch.config.ts")
       );
 
-      let webpackTargetPath = "";
+      let webpackTargetPaths = [""];
       if (argv.target === "osx") {
-        webpackTargetPath = "../scripts/webpack/webpack.electron.cjs";
+        webpackTargetPaths = ["../scripts/webpack/webpack.electron.cjs"];
         shell.env["TARGET"] = "electron";
         shell.env["NODE_ENV"] = "production";
       } else if (argv.target === "web") {
-        webpackTargetPath = "../scripts/webpack/webpack.web.cjs";
+        webpackTargetPaths = ["../scripts/webpack/webpack.web.cjs"];
+        shell.env["NODE_ENV"] = "production";
+      } else if (argv.target === "app") {
+        webpackTargetPaths = [
+          "../scripts/webpack/webpack.app.client.cjs",
+          "../scripts/webpack/webpack.app.server.cjs",
+        ];
         shell.env["NODE_ENV"] = "production";
       }
 
-      const webpackPath = path.join(__dirname, webpackTargetPath);
+      for (const webpackTargetPath of webpackTargetPaths) {
+        const webpackPath = path.join(__dirname, webpackTargetPath);
 
-      console.log("Starting development server...");
-      shell.env["SK2TCH_CONFIG"] = JSON.stringify(config);
-      const webpack = shell.exec(
-        `npx webpack --color --config=${webpackPath}`,
-        {
-          async: true,
-        }
-      );
-      webpack.stdout.on("data", (data) => {
-        process.stdout.write(data);
-      });
-      webpack.stderr.on("data", (data) => {
-        process.stderr.write(data);
-      });
+        console.log("Starting development server...");
+        shell.env["SK2TCH_CONFIG"] = JSON.stringify(config);
+        const webpack = shell.exec(
+          `npx webpack --color --config=${webpackPath}`,
+          {
+            async: true,
+          }
+        );
+        webpack.stdout.on("data", (data) => {
+          process.stdout.write(data);
+        });
+        webpack.stderr.on("data", (data) => {
+          process.stderr.write(data);
+        });
+      }
     }
     // Add your build logic for web, osx, or win here
   )
