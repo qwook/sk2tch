@@ -12,6 +12,7 @@ export default class RetriableTextureLoader extends Loader {
     const loader = new ImageLoader(this.manager);
     loader.setCrossOrigin(this.crossOrigin);
     loader.setPath(this.path);
+    onLoad && onLoad(texture);
 
     let retries_left = 10;
     const loadFn = () => {
@@ -34,7 +35,7 @@ export default class RetriableTextureLoader extends Loader {
           } else {
             if (onError !== undefined) {
               err.message = `Failed to download this file. Check your internet connection.`;
-              onError(err);
+              // onError(err);
             }
           }
         }
