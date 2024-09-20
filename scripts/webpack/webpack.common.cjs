@@ -14,17 +14,7 @@ const { DefinePlugin, ProvidePlugin } = webpack;
 
 const sk2tchConfig = JSON.parse(process.env["SK2TCH_CONFIG"]);
 
-let webpackHotMiddleware = path.resolve(
-  __dirname,
-  "../../node_modules/webpack-hot-middleware/client"
-);
-
-if (!fs.existsSync(webpackHotMiddleware)) {
-  webpackHotMiddleware = path.resolve(
-    __dirname,
-    "../../../webpack-hot-middleware/client"
-  );
-}
+let webpackHotMiddleware = "webpack-hot-middleware/client";
 
 let pages = {};
 
