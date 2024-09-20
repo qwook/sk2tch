@@ -102,7 +102,13 @@ module.exports = {
     rules: [
       {
         test: /\.(ts|tsx|js|jsx)$/, // Add TypeScript file extensions
-        exclude: /node_modules/,
+        exclude: (filePath) => {
+          // Exclude all node_modules except for the 'sk2tch' module
+          return (
+            /node_modules/.test(filePath) &&
+            !/node_modules\/sk2tch/.test(filePath)
+          );
+        },
         use: {
           loader: "ts-loader", // Use ts-loader for TypeScript files
           options: {
