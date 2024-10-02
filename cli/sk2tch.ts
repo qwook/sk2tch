@@ -41,6 +41,7 @@ async function spawnAsync(
     const childProcess = spawn(command, args, {
       env: { ...process.env, ...env },
       stdio: ["inherit", "pipe", "pipe"],
+      shell: true,
       ...otherOptions,
     });
 
