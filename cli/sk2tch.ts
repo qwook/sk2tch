@@ -271,29 +271,45 @@ yargs(hideBin(process.argv))
           }
         );
 
-        const { stdout: winepath } = await spawnAsync(
-          "winepath",
-          [path.join(resolvedPath, "dist/steam/app_build.vdf"), "-w"],
-          {
-            cwd,
-            env: { ...process.env, ...env },
-          }
-        );
-
-        await spawnAsync(
-          "wine",
-          [
+        if (process.platform === 'win32') {
+          await spawnAsync(
             path.join(__dirname, "../scripts/steamcmd/steamcmd.exe"),
-            "+login",
-            config.releasing.steam.username,
-            "+run_app_build",
-            winepath.replace(/[\n\t]/g, ""),
-          ],
-          {
-            cwd,
-            env: { ...process.env, ...env },
-          }
-        );
+            [
+              "+login",
+              config.releasing.steam.username,
+              "+run_app_build",
+              path.join(resolvedPath, "dist/steam/app_build.vdf"),
+            ],
+            {
+              cwd,
+              env: { ...process.env, ...env },
+            }
+          );
+        } else {
+          const { stdout: winepath } = await spawnAsync(
+            "winepath",
+            [path.join(resolvedPath, "dist/steam/app_build.vdf"), "-w"],
+            {
+              cwd,
+              env: { ...process.env, ...env },
+            }
+          );
+  
+          await spawnAsync(
+            "wine",
+            [
+              path.join(__dirname, "../scripts/steamcmd/steamcmd.exe"),
+              "+login",
+              config.releasing.steam.username,
+              "+run_app_build",
+              winepath.replace(/[\n\t]/g, ""),
+            ],
+            {
+              cwd,
+              env: { ...process.env, ...env },
+            }
+          );
+        }
 
         //       docker run -it \
         // -v ${SCRIPT_DIR}/config.vdf:/home/steam/Steam/config/config.vdf \

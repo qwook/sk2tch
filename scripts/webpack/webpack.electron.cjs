@@ -14,7 +14,7 @@ module.exports = merge(common, {
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: path.join(__dirname, "../electron/*"),
+          from: path.join(__dirname, "../electron/*").replace(/\\/g, "/"),
           to: ({ context, absoluteFilename }) => {
             return path.join(
               sk2tchConfig.output,

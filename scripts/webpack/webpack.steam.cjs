@@ -17,7 +17,7 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: path.join(__dirname, "../steam/*"),
+          from: path.join(__dirname, "../steam/*").replace(/\\/g, "/"),
           to: ({ context, absoluteFilename }) => {
             return path.join(sk2tchConfig.output, "steam", "[name][ext]");
           },
