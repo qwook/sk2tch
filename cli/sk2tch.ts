@@ -5,7 +5,6 @@ import { Sk2tchConfig } from "./sk2tch.config";
 const path = require("path");
 const yargs = require("yargs");
 const { hideBin } = require("yargs/helpers");
-const shell = require("shelljs");
 const { spawn } = require("child_process");
 
 const env = {};
@@ -25,6 +24,44 @@ async function getConfig(
     }
   }
   return config;
+}
+
+async function spawnAsync(
+  command,
+  args,
+  options: { env?: any; [key: string]: any } = {}
+) {
+  return new Promise((resolve, reject) => {
+    const { env, ...otherOptions } = options;
+
+    const childProcess = spawn(command, args, {
+      env: { ...process.env, ...env },
+      stdio: ["inherit", "pipe", "pipe"],
+      ...otherOptions,
+    });
+
+    childProcess.stdout.on("data", (data) => {
+      process.stdout.write(data);
+    });
+
+    childProcess.stderr.on("data", (data) => {
+      process.stderr.write(data);
+    });
+
+    childProcess.on("close", (code) => {
+      console.log(`Child process exited with code ${code}`);
+      if (code === 0) {
+        resolve({ code });
+      } else {
+        reject(new Error(`Child process exited with code ${code}`));
+      }
+    });
+
+    childProcess.on("error", (err) => {
+      console.error("Failed to start child process:", err);
+      reject(err);
+    });
+  });
 }
 
 // Define your commands
@@ -57,32 +94,21 @@ yargs(hideBin(process.argv))
       env["SK2TCH_CONFIG"] = JSON.stringify(config);
       env["NODE_ENV"] = "development";
 
-      let webpack;
       const cwd = path.resolve(__dirname, "..");
       if (config.server) {
-        webpack = spawn("npx", ["tsx", "serve", config.server], {
+        await spawnAsync("npx", ["tsx", "serve", config.server], {
           cwd,
           env: { ...process.env, ...env },
-          stdio: ["inherit", "pipe", "pipe"],
         });
       } else {
-        webpack = spawn(
+        await spawnAsync(
           "npx",
           ["webpack", "--color", "serve", "--config", webpackPath],
           {
             cwd,
             env: { ...process.env, ...env },
-            stdio: ["inherit", "pipe", "pipe"],
           }
         );
-      }
-      if (!config.server) {
-        webpack.stdout.on("data", (data) => {
-          process.stdout.write(data);
-        });
-        webpack.stderr.on("data", (data) => {
-          process.stderr.write(data);
-        });
       }
     }
   )
@@ -104,7 +130,6 @@ yargs(hideBin(process.argv))
     },
     async (argv) => {
       console.log(`Building for ${argv.target}...`);
-      console.error("Not implemented!");
       const resolvedPath = path.resolve(argv.path as string);
 
       // Try to find the sk2tch config file.
@@ -133,20 +158,38 @@ yargs(hideBin(process.argv))
         const webpackPath = path.join(__dirname, webpackTargetPath);
 
         console.log(`Building: ${webpackTargetPath}`);
-        const webpack = spawn(
+        await spawnAsync(
           "npx",
           ["webpack", "--color", "--config", webpackPath],
           {
             env: { ...process.env, ...env },
-            stdio: ["inherit", "pipe", "pipe"],
           }
         );
-        webpack.stdout.on("data", (data) => {
-          process.stdout.write(data);
+      }
+
+      if (argv.target === "osx") {
+        console.log(`Creating electron app.`);
+
+        await spawnAsync("npm", ["install"], {
+          cwd: path.join(resolvedPath, "dist/electron"),
+          env: { ...process.env, ...env },
         });
-        webpack.stderr.on("data", (data) => {
-          process.stderr.write(data);
-        });
+
+        await spawnAsync(
+          "npx",
+          [
+            "electron-builder",
+            "--project",
+            path.join(resolvedPath, "dist/electron"),
+            "--config",
+            path.join(__dirname, "../scripts/electron-builder-dev.json"),
+            "--mac",
+            "--universal",
+          ],
+          {
+            env: { ...process.env, ...env },
+          }
+        );
       }
     }
     // Add your build logic for web, osx, or win here
