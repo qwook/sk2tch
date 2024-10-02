@@ -6,6 +6,9 @@ const path = require("path");
 const yargs = require("yargs");
 const { hideBin } = require("yargs/helpers");
 const shell = require("shelljs");
+const { spawn } = require("child_process");
+
+const env = {};
 
 async function getConfig(
   relativePath: string,
@@ -51,18 +54,25 @@ yargs(hideBin(process.argv))
       );
 
       console.log("Starting development server...");
-      shell.env["SK2TCH_CONFIG"] = JSON.stringify(config);
+      env["SK2TCH_CONFIG"] = JSON.stringify(config);
+      env["NODE_ENV"] = "development";
+
       let webpack;
-      shell.cd(path.resolve(__dirname, ".."));
+      const cwd = path.resolve(__dirname, "..");
       if (config.server) {
-        webpack = shell.exec(`NODE_ENV=development npx tsx ${config.server}`, {
-          async: true,
+        webpack = spawn("npx", ["tsx", "serve", config.server], {
+          cwd,
+          env: { ...process.env, ...env },
+          stdio: ["inherit", "pipe", "pipe"],
         });
       } else {
-        webpack = shell.exec(
-          `NODE_ENV=development npx webpack --color serve --config=${webpackPath}`,
+        webpack = spawn(
+          "npx",
+          ["webpack", "--color", "serve", "--config", webpackPath],
           {
-            async: true,
+            cwd,
+            env: { ...process.env, ...env },
+            stdio: ["inherit", "pipe", "pipe"],
           }
         );
       }
@@ -103,31 +113,32 @@ yargs(hideBin(process.argv))
         path.join(resolvedPath, "sk2tch.config.ts")
       );
 
+      env["SK2TCH_CONFIG"] = JSON.stringify(config);
+      env["NODE_ENV"] = "production";
+
       let webpackTargetPaths = [""];
       if (argv.target === "osx") {
         webpackTargetPaths = ["../scripts/webpack/webpack.electron.cjs"];
-        shell.env["TARGET"] = "electron";
-        shell.env["NODE_ENV"] = "production";
+        env["TARGET"] = "electron";
       } else if (argv.target === "web") {
         webpackTargetPaths = ["../scripts/webpack/webpack.web.cjs"];
-        shell.env["NODE_ENV"] = "production";
       } else if (argv.target === "app") {
         webpackTargetPaths = [
           "../scripts/webpack/webpack.app.client.cjs",
           "../scripts/webpack/webpack.app.server.cjs",
         ];
-        shell.env["NODE_ENV"] = "production";
       }
 
       for (const webpackTargetPath of webpackTargetPaths) {
         const webpackPath = path.join(__dirname, webpackTargetPath);
 
-        console.log("Starting development server...");
-        shell.env["SK2TCH_CONFIG"] = JSON.stringify(config);
-        const webpack = shell.exec(
-          `npx webpack --color --config=${webpackPath}`,
+        console.log(`Building: ${webpackTargetPath}`);
+        const webpack = spawn(
+          "npx",
+          ["webpack", "--color", "--config", webpackPath],
           {
-            async: true,
+            env: { ...process.env, ...env },
+            stdio: ["inherit", "pipe", "pipe"],
           }
         );
         webpack.stdout.on("data", (data) => {
