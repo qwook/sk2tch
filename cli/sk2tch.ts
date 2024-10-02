@@ -96,7 +96,7 @@ yargs(hideBin(process.argv))
 
       const cwd = path.resolve(__dirname, "..");
       if (config.server) {
-        await spawnAsync("npx", ["tsx", "serve", config.server], {
+        await spawnAsync("npx", ["tsx", config.server], {
           cwd,
           env: { ...process.env, ...env },
         });
