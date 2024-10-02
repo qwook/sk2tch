@@ -1,9 +1,10 @@
 {
   "appId": "$__APP_ID__",
+  "compression": "maximum",
   "artifactName": "${productName}.${ext}",
   "directories": {
     "output": "../${platform}/${arch}",
-    "buildResources": "../icons"
+    "buildResources": "./resources"
   },
   "mac": {
     "icon": "public/horror/otherworld.png",
