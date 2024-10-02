@@ -1,8 +1,8 @@
 {
-  "appId": "com.lastseenonline",
+  "appId": "$__APP_ID__",
   "artifactName": "${productName}.${ext}",
   "directories": {
-    "output": "../builds/${platform}/${arch}",
+    "output": "../${platform}/${arch}",
     "buildResources": "../icons"
   },
   "mac": {

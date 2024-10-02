@@ -6,6 +6,8 @@ import React, { useContext, useEffect } from "react";
 
 import EventEmitter from "events";
 import stripJsonComments from "strip-json-comments";
+import { builtInLanguages } from "../../games/horror/src/LanguageMenu";
+import { DEFAULT_LANGUAGE } from "../../games/horror/src/sv_cheats";
 
 export class FormattableString extends String {
   constructor(template) {
@@ -70,8 +72,14 @@ export const l10n = {
     currentLanguageFileProxy = new Proxy({}, handler);
     l10nEvents.emit("languageFileLoaded", currentLanguageFileProxy);
   },
-  loadLanguageFile: async (path) => {
-    l10n.loadLanguageText(await (await fetch(path)).text());
+  loadLanguageKey: async (key) => {
+    let languageFile;
+    try {
+      languageFile = await fetch(builtInLanguages[key]);
+    } catch (e) {
+      languageFile = await fetch(builtInLanguages[DEFAULT_LANGUAGE]);
+    }
+    l10n.loadLanguageText(await languageFile.text());
   },
   loadLanguageText: (text) => {
     let languageFile;

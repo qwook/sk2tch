@@ -1,14 +1,14 @@
 "AppBuild"
 {
-	"AppID" "${APP_ID}" // Your AppID
+	"AppID" "$__STEAM_APP_ID__" // Your AppID
 	"Desc" "Genesis" // internal description for this build
 	"Preview" "0" // make this a preview build only, nothing is uploaded
 	"Local" "" // put content on local content server instead of uploading to Steam
 	"SetLive" "" // set this build live on beta branch AlphaTest
-	"ContentRoot" "..\builds\" // content root folder relative to this script file
-	"BuildOutput" "..\builds_output\" // put build cache and log files on different drive for better performance
+	"ContentRoot" "..\electron\darwin\" // content root folder relative to this script file
+	"BuildOutput" "..\steam_build_cache\" // put build cache and log files on different drive for better performance
 	"Depots"
 	{
-		${DEPOTS}
+$__STEAM_DEPOTS__
 	}
 }

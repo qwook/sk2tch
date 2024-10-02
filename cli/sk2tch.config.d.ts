@@ -2,6 +2,7 @@ export interface Sk2tchConfig {
   name: string;
   entry: string;
   output: string;
+  icon?: string;
 
   // Used if this sketch has it's own hosted server.
   server?: string;
@@ -14,6 +15,7 @@ export interface Sk2tchConfig {
   };
 
   releasing?: {
+    appId: string;
     osx?: {
       appleApiKey: string;
       appleApiKeyId: string;

@@ -10,10 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "mkdirp": "file:../../../../sk2tch/node_modules/mkdirp",
-    "steamworks.js": "file:../../../../sk2tch/node_modules/steamworks.js"
+    "mkdirp": "^3.0.1",
+    "steamworks.js": "^0.3.1"
   },
   "devDependencies": {
-    "electron": "file:../../../../sk2tch/node_modules/electron"
+    "electron": "28.1.0"
   }
 }

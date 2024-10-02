@@ -1,16 +1,16 @@
 {
-  "appId": "com.lastseenonline",
+  "appId": "$__APP_ID__",
   "artifactName": "${productName}.${ext}",
   "directories": {
-    "output": "./dist/${platform}/${arch}",
+    "output": "../${platform}/${arch}",
     "buildResources": "../icons"
   },
   "mac": {
-    "icon": "public/horror/otherworld.png",
+    "icon": "icon.png",
     "mergeASARs": false,
     "notarize": false
   },
   "win": {
-    "icon": "public/horror/otherworld.png"
+    "icon": "icon.png"
   }
 }

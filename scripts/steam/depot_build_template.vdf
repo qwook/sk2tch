@@ -1,13 +1,13 @@
 "DepotBuild"
 {
 	// Set your assigned depot ID here
-	"DepotID" "${DEPOT_ID}"
+	"DepotID" "$__STEAM_DEPOT_ID__"
 
 	// include all files recursivley
 	"FileMapping"
 	{
 		// This can be a full path, or a path relative to ContentRoot
-		"LocalPath" "${DEPOT_PATH}"
+		"LocalPath" "$__STEAM_DEPOT_PATH__"
 
 		// This is a path relative to the install folder of your game
 		"DepotPath" "."
