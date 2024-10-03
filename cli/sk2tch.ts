@@ -2,7 +2,6 @@
 
 import { existsSync, fstat } from "fs";
 import { Sk2tchConfig } from "./sk2tch.config";
-import { rm, rmdir } from "fs/promises";
 import { exec } from "child_process";
 
 const path = require("path");
@@ -226,31 +225,6 @@ yargs(hideBin(process.argv))
         await spawnAsync("npx", electronArgs, {
           env: { ...process.env, ...env },
         });
-
-        // Disabling the bottom.
-        // Steam updates work better if I am not updating a giant binary.
-        /*if (argv.target === "win") {
-          const unpackedDir = path.join(
-            resolvedPath,
-            "dist/electron/darwin/x64/win-unpacked"
-          );
-          // rm * protection.
-          if (
-            unpackedDir === "/" ||
-            unpackedDir === "." ||
-            unpackedDir === "*" ||
-            unpackedDir === ""
-          ) {
-            return;
-          }
-          await rm(
-            path.join(resolvedPath, "dist/electron/darwin/x64/win-unpacked"),
-            {
-              recursive: true,
-              force: true,
-            }
-          );
-        }*/
       }
     }
   )
@@ -315,9 +289,7 @@ yargs(hideBin(process.argv))
           );
         } else {
           if (
-            !existsSync(
-              path.join(__dirname, "../scripts/steamcmd/steamcmd.sh")
-            )
+            !existsSync(path.join(__dirname, "../scripts/steamcmd/steamcmd.sh"))
           ) {
             const { stdout, stderr } = await exec(
               'curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_osx.tar.gz" | tar zxvf -',
@@ -343,13 +315,6 @@ yargs(hideBin(process.argv))
             }
           );
         }
-
-        //       docker run -it \
-        // -v ${SCRIPT_DIR}/config.vdf:/home/steam/Steam/config/config.vdf \
-        // -v ${SCRIPT_DIR}/../:/home/steam/Sketches \
-        // steamcommando ./steamcmd.sh \
-        // +login $__STEAM_USERNAME__ \
-        // +run_app_build /home/steam/Sketches/steam/app_build.vdf +quit
       } else {
         console.log(`Publishing to ${argv.platform}...`);
         console.error("Not implemented!");
