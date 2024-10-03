@@ -1,6 +1,9 @@
 #!/usr/bin/env ts-node
 
+import { existsSync, fstat } from "fs";
 import { Sk2tchConfig } from "./sk2tch.config";
+import { rm, rmdir } from "fs/promises";
+import { exec } from "child_process";
 
 const path = require("path");
 const yargs = require("yargs");
@@ -41,7 +44,7 @@ async function spawnAsync(
     const childProcess = spawn(command, args, {
       env: { ...process.env, ...env },
       stdio: ["inherit", "pipe", "pipe"],
-      shell: true,
+      shell: process.platform === "win32",
       ...otherOptions,
     });
 
@@ -223,6 +226,31 @@ yargs(hideBin(process.argv))
         await spawnAsync("npx", electronArgs, {
           env: { ...process.env, ...env },
         });
+
+        // Disabling the bottom.
+        // Steam updates work better if I am not updating a giant binary.
+        /*if (argv.target === "win") {
+          const unpackedDir = path.join(
+            resolvedPath,
+            "dist/electron/darwin/x64/win-unpacked"
+          );
+          // rm * protection.
+          if (
+            unpackedDir === "/" ||
+            unpackedDir === "." ||
+            unpackedDir === "*" ||
+            unpackedDir === ""
+          ) {
+            return;
+          }
+          await rm(
+            path.join(resolvedPath, "dist/electron/darwin/x64/win-unpacked"),
+            {
+              recursive: true,
+              force: true,
+            }
+          );
+        }*/
       }
     }
   )
@@ -271,7 +299,7 @@ yargs(hideBin(process.argv))
           }
         );
 
-        if (process.platform === 'win32') {
+        if (process.platform === "win32") {
           await spawnAsync(
             path.join(__dirname, "../scripts/steamcmd/steamcmd.exe"),
             [
@@ -286,23 +314,28 @@ yargs(hideBin(process.argv))
             }
           );
         } else {
-          const { stdout: winepath } = await spawnAsync(
-            "winepath",
-            [path.join(resolvedPath, "dist/steam/app_build.vdf"), "-w"],
-            {
-              cwd,
-              env: { ...process.env, ...env },
-            }
-          );
-  
+          if (
+            !existsSync(
+              path.join(__dirname, "../scripts/steamcmd/steamcmd.sh")
+            )
+          ) {
+            const { stdout, stderr } = await exec(
+              'curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_osx.tar.gz" | tar zxvf -',
+              {
+                cwd: path.join(__dirname, "../scripts/steamcmd"),
+              }
+            );
+          }
+
           await spawnAsync(
-            "wine",
+            "sh",
             [
-              path.join(__dirname, "../scripts/steamcmd/steamcmd.exe"),
+              path.join(__dirname, "../scripts/steamcmd/steamcmd.sh"),
               "+login",
               config.releasing.steam.username,
               "+run_app_build",
-              winepath.replace(/[\n\t]/g, ""),
+              path.join(resolvedPath, "dist/steam/app_build.vdf"),
+              "+quit",
             ],
             {
               cwd,

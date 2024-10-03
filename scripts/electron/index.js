@@ -16,7 +16,9 @@ const cloudEnabled =
 
 let appPath = app.getPath("userData");
 
-if (process.env.NODE_ENV !== "development") {
+let isDev =
+  process.env.NODE_ENV === "development" || process.argv.includes("--dev");
+if (!isDev) {
   Menu.setApplicationMenu(null);
 }
 
