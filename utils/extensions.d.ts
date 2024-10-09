@@ -6,3 +6,6 @@ declare module "*.vert" {
   const vert: { [key: string]: string };
   export default vert;
 }
+declare module "*.txt" {
+  export default string;
+}

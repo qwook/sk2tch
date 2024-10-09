@@ -137,7 +137,7 @@ module.exports = {
         type: "asset/resource", // For Webpack 5+
       },
       {
-        test: /\.(frag|vert)$/i,
+        test: /\.(frag|vert|txt)$/i,
         use: "raw-loader",
       },
     ],
