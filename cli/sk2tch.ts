@@ -18,7 +18,7 @@ async function getConfig(
   const { default: config } = await import(configPath);
   config.entry = path.join(relativePath, config.entry);
   config.output = path.join(relativePath, config.output);
-  config.icon = path.join(relativePath, config.icon);
+  config.icon = config.icon && path.join(relativePath, config.icon);
   config.server = config.server && path.join(relativePath, config.server);
 
   if (config.pages) {
