@@ -34,14 +34,14 @@ const Layout = forwardRef(
         setOrientation(orientation);
 
         if (orientation === "landscape") {
-          if (ratio < 4 / 3) {
+          if (ratio < targetWidth / targetHeight) {
             setSize(width / targetWidth);
           } else {
             setSize(height / targetHeight);
           }
         }
         if (orientation === "portrait") {
-          if (ratio < 3 / 4) {
+          if (ratio < targetHeight / targetWidth) {
             setSize(width / targetHeight);
           } else {
             setSize(height / targetWidth);
