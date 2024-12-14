@@ -5,7 +5,10 @@ import { createContext } from "react";
 export const LayoutContext = createContext();
 
 const Layout = forwardRef(
-  ({ targetWidth = 800, targetHeight = 600, children }, ref) => {
+  (
+    { targetWidth = 800, targetHeight = 600, landscapeOnly = false, children },
+    ref
+  ) => {
     const [orientation, setOrientation] = useState(
       window.innerWidth / window.innerHeight < 1 ? "portrait" : "landscape"
     );
@@ -30,7 +33,11 @@ const Layout = forwardRef(
         const height = window.innerHeight;
         setWindowSize({ width, height });
         const ratio = width / height;
-        const orientation = ratio < 1 ? "portrait" : "landscape";
+        const orientation = landscapeOnly
+          ? "landscape"
+          : ratio < 1
+          ? "portrait"
+          : "landscape";
         setOrientation(orientation);
 
         if (orientation === "landscape") {
