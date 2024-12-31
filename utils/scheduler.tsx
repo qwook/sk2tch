@@ -7,7 +7,7 @@
 
 import customEvents from "./customEvents";
 import { RenderCallback, useFrame } from "@react-three/fiber";
-import { useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 // Todo: Figure out a better name for this? Maybe this is just a time library.
 // Todo: Pull this out into a context.
@@ -70,6 +70,26 @@ export function setPaused(paused: boolean) {
     gameTimeSinceUnpaused = performance.now();
   }
   isPaused = paused;
+}
+
+export function useFramePausibleCanvasless(
+  callback: (delta: number) => null,
+) {
+  useEffect(() => {
+    let animationFrame;
+    let lastTime = performance.now();
+    const frame = () => {
+      const time = performance.now();
+      const deltaTime = time - lastTime;
+      lastTime = time;
+      callback(deltaTime);
+      animationFrame = requestAnimationFrame(frame);
+    };
+    frame();
+    return () => {
+      cancelAnimationFrame(animationFrame);
+    };
+  }, [callback]);
 }
 
 export function useFramePausible(

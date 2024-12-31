@@ -127,6 +127,9 @@ export default function useTimelineAnimation(
       if (playing && options?.norestart) {
         return;
       }
+      if (playing && options?.onRestart) {
+        options?.onRestart();
+      }
       setPlaying(true);
       playingRef.current = true;
       progressTime.current = 0;
