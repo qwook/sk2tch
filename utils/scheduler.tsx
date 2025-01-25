@@ -92,6 +92,26 @@ export function useFramePausibleCanvasless(
   }, [callback]);
 }
 
+export function useFrameCanvasless(
+  callback: (delta: number) => void,
+) {
+  useEffect(() => {
+    let animationFrame;
+    let lastTime = performance.now();
+    const frame = () => {
+      const time = performance.now();
+      const deltaTime = time - lastTime;
+      lastTime = time;
+      callback(deltaTime);
+      animationFrame = requestAnimationFrame(frame);
+    };
+    frame();
+    return () => {
+      cancelAnimationFrame(animationFrame);
+    };
+  }, [callback]);
+}
+
 export function useFramePausible(
   callback: RenderCallback,
   renderPriority?: number

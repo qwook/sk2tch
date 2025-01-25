@@ -135,6 +135,9 @@ module.exports = {
       {
         test: /\.(png|jpg|jpeg|gif|svg|mp3|mp4|webm|ttf|otf|jsonc|gltf|glb|obj)$/, // Images
         type: "asset/resource", // For Webpack 5+
+        generator: {
+          filename: "assets/[name].[contenthash][ext]", // Consistent static file names
+        },
       },
       {
         test: /\.(frag|vert|txt)$/i,
@@ -167,6 +170,7 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, "../../index.html"),
+      title: sk2tchConfig.name,
       chunks: ["bundle"],
     }),
     ...Object.keys(sk2tchConfig.pages || {}).map(
