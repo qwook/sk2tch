@@ -62,7 +62,9 @@ const Layout = forwardRef(
       };
     }, []);
     return (
-      <LayoutContext.Provider value={{ size, orientation }}>
+      <LayoutContext.Provider
+        value={{ size, orientation, targetWidth, targetHeight }}
+      >
         <div
           style={{
             position: "absolute",

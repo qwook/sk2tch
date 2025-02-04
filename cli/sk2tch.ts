@@ -80,6 +80,11 @@ yargs(hideBin(process.argv))
     "dev [path]",
     "Start the development server",
     (yargs) => {
+      yargs.boolean("serve", {
+        describe: "To host on a local server.",
+        default: false,
+        type: "boolean",
+      });
       yargs.positional("path", {
         describe: "The path to start the dev server in",
         default: ".",
@@ -105,15 +110,24 @@ yargs(hideBin(process.argv))
       env["NODE_ENV"] = "development";
 
       const cwd = path.resolve(__dirname, "..");
-      if (config.server) {
+      if (config.server && argv.serve) {
         await spawnAsync("npx", ["tsx", config.server], {
           cwd,
           env: { ...process.env, ...env },
         });
-      } else {
+      } else if (argv.serve) {
         await spawnAsync(
           "npx",
           ["webpack", "--color", "serve", "--config", webpackPath],
+          {
+            cwd,
+            env: { ...process.env, ...env },
+          }
+        );
+      } else {
+        await spawnAsync(
+          "npx",
+          ["webpack", "--color", "--config", webpackPath],
           {
             cwd,
             env: { ...process.env, ...env },
