@@ -216,7 +216,7 @@ yargs(hideBin(process.argv))
         if (argv.target === "osx") {
           electronArgs.push(
             "--config",
-            path.join(__dirname, "../scripts/electron-builder-dev.json")
+            path.join(resolvedPath, "dist/electron/package/electron-builder-dev.json")
           );
           electronArgs.push("--mac", "--universal");
         } else if (argv.target === "osx-signed") {
@@ -225,13 +225,13 @@ yargs(hideBin(process.argv))
           env["APPLE_API_ISSUER"] = config.releasing.osx.appleApiIssuer;
           electronArgs.push(
             "--config",
-            path.join(__dirname, "../scripts/electron-builder.json")
+            path.join(resolvedPath, "dist/electron/package/electron-builder.json")
           );
           electronArgs.push("--mac", "--universal");
         } else if (argv.target === "win") {
           electronArgs.push(
             "--config",
-            path.join(__dirname, "../scripts/electron-builder.json")
+            path.join(resolvedPath, "dist/electron/package/electron-builder.json")
           );
           electronArgs.push("--win", "portable", "--x64");
         }

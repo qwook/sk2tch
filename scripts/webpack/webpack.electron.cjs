@@ -26,6 +26,8 @@ module.exports = merge(common, {
             return content
               .toString()
               .replace("$__APP_ID__", sk2tchConfig.releasing.appId)
+              .replace("$__APP_PRODUCT_NAME__", sk2tchConfig.name)
+              .replace("$__APP_CODE__", sk2tchConfig.code);
           },
         },
         ...(sk2tchConfig.icon

@@ -1,5 +1,7 @@
 export interface Sk2tchConfig {
   name: string;
+  code: string;
+
   entry: string;
   output: string;
   icon?: string;

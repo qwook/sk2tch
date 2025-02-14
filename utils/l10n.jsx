@@ -86,6 +86,7 @@ export const l10n = {
     try {
       languageFile = JSON.parse(stripJsonComments(text));
     } catch (e) {
+      console.log(e);
       console.log("Error loading language.");
       return;
     }
