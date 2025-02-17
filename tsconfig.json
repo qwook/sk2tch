@@ -22,6 +22,8 @@
     "src",
     "electron/preload.js",
     "electron/electron.js",
-    "shaders.d.ts"
+    "shaders.d.ts",
+    "**/**.tsx",
+    "**/**.ts"
   ]
 }
