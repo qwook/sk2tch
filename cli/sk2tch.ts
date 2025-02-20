@@ -137,6 +137,115 @@ yargs(hideBin(process.argv))
     }
   )
   .command(
+    "electron [path]",
+    "Run the electron app in development mode.",
+    (yargs) => {
+      yargs.positional("path", {
+        describe: "The path to start the dev server in",
+        default: ".",
+        type: "string",
+      });
+    },
+    async (argv) => {
+      console.log(`Building for ${argv.target}...`);
+      const resolvedPath = path.resolve(argv.path as string);
+
+      // Try to find the sk2tch config file.
+      const config = await getConfig(
+        resolvedPath,
+        path.join(resolvedPath, "sk2tch.config.ts")
+      );
+
+      env["SK2TCH_CONFIG"] = JSON.stringify(config);
+      env["NODE_ENV"] = "production";
+
+      let webpackTargetPaths = [""];
+      if (
+        argv.target === "osx" ||
+        argv.target === "osx-signed" ||
+        argv.target === "win"
+      ) {
+        webpackTargetPaths = ["../scripts/webpack/webpack.electron.cjs"];
+        env["TARGET"] = "electron";
+      } else if (argv.target === "web") {
+        webpackTargetPaths = ["../scripts/webpack/webpack.web.cjs"];
+      } else if (argv.target === "app") {
+        webpackTargetPaths = [
+          "../scripts/webpack/webpack.app.client.cjs",
+          "../scripts/webpack/webpack.app.server.cjs",
+        ];
+      }
+
+      for (const webpackTargetPath of webpackTargetPaths) {
+        const webpackPath = path.join(__dirname, webpackTargetPath);
+
+        console.log(`Building: ${webpackTargetPath}`);
+        await spawnAsync(
+          "npx",
+          ["webpack", "--color", "--config", webpackPath],
+          {
+            env: { ...process.env, ...env },
+          }
+        );
+      }
+
+      if (
+        argv.target === "osx" ||
+        argv.target === "osx-signed" ||
+        argv.target === "win"
+      ) {
+        console.log(`Creating electron app.`);
+
+        await spawnAsync("npm", ["install"], {
+          cwd: path.join(resolvedPath, "dist/electron/package"),
+          env: { ...process.env, ...env },
+        });
+
+        const electronArgs = [
+          "electron-builder",
+          "--project",
+          path.join(resolvedPath, "dist/electron/package"),
+        ];
+
+        if (argv.target === "osx") {
+          electronArgs.push(
+            "--config",
+            path.join(
+              resolvedPath,
+              "dist/electron/package/electron-builder-dev.json"
+            )
+          );
+          electronArgs.push("--mac", "--universal");
+        } else if (argv.target === "osx-signed") {
+          env["APPLE_API_KEY"] = config.releasing.osx.appleApiKey;
+          env["APPLE_API_KEY_ID"] = config.releasing.osx.appleApiKeyId;
+          env["APPLE_API_ISSUER"] = config.releasing.osx.appleApiIssuer;
+          electronArgs.push(
+            "--config",
+            path.join(
+              resolvedPath,
+              "dist/electron/package/electron-builder.json"
+            )
+          );
+          electronArgs.push("--mac", "--universal");
+        } else if (argv.target === "win") {
+          electronArgs.push(
+            "--config",
+            path.join(
+              resolvedPath,
+              "dist/electron/package/electron-builder.json"
+            )
+          );
+          electronArgs.push("--win", "portable", "--x64");
+        }
+
+        await spawnAsync("npx", electronArgs, {
+          env: { ...process.env, ...env },
+        });
+      }
+    }
+  )
+  .command(
     "build [target] [path]",
     "Build the project for a specific target (web, osx, win)",
     (yargs) => {
@@ -216,7 +325,10 @@ yargs(hideBin(process.argv))
         if (argv.target === "osx") {
           electronArgs.push(
             "--config",
-            path.join(resolvedPath, "dist/electron/package/electron-builder-dev.json")
+            path.join(
+              resolvedPath,
+              "dist/electron/package/electron-builder-dev.json"
+            )
           );
           electronArgs.push("--mac", "--universal");
         } else if (argv.target === "osx-signed") {
@@ -225,13 +337,19 @@ yargs(hideBin(process.argv))
           env["APPLE_API_ISSUER"] = config.releasing.osx.appleApiIssuer;
           electronArgs.push(
             "--config",
-            path.join(resolvedPath, "dist/electron/package/electron-builder.json")
+            path.join(
+              resolvedPath,
+              "dist/electron/package/electron-builder.json"
+            )
           );
           electronArgs.push("--mac", "--universal");
         } else if (argv.target === "win") {
           electronArgs.push(
             "--config",
-            path.join(resolvedPath, "dist/electron/package/electron-builder.json")
+            path.join(
+              resolvedPath,
+              "dist/electron/package/electron-builder.json"
+            )
           );
           electronArgs.push("--win", "portable", "--x64");
         }

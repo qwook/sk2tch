@@ -1,0 +1,21 @@
+.cheats-menu {
+  table {
+    margin: 20px;
+    td,
+    th {
+      text-align: left;
+      padding: 5px;
+    }
+  }
+
+  table,
+  th,
+  td {
+    border: 1px dashed white;
+    border-collapse: collapse;
+  }
+
+  input[type="text"] {
+    font-family: "Courier New";
+  }
+}

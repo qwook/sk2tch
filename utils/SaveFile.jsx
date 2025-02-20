@@ -1,12 +1,28 @@
 import { createContext, useEffect, useState } from "react";
 import cheats from "./cheats";
 
-let saveState =
-  typeof window !== "undefined" && window.electronAPI
-    ? JSON.parse(window.electronAPI.loadKey("save")) || {}
-    : (typeof localStorage !== "undefined"
-        ? JSON.parse(localStorage.getItem("save"))
-        : null) || {};
+// Common load storage function.
+export function loadStorage(keyName) {
+  try {
+    return typeof window !== "undefined" && window.electronAPI
+      ? JSON.parse(window.electronAPI.loadKey(keyName)) || {}
+      : (typeof localStorage !== "undefined"
+          ? JSON.parse(localStorage.getItem(keyName))
+          : null) || {};
+  } catch (e) {
+    console.log(e);
+    return {};
+  }
+}
+
+// Common save storage function.
+export function saveStorage(keyName, value) {
+  window.electronAPI
+    ? window.electronAPI?.saveKey(keyName, JSON.stringify(value))
+    : localStorage.setItem(keyName, JSON.stringify(value));
+}
+
+let saveState = loadStorage("save");
 
 /**
  *
@@ -41,17 +57,13 @@ export function useSaveState(
 
 export function resetSave() {
   saveState = {};
-  window.electronAPI
-    ? window.electronAPI?.saveKey("save", JSON.stringify(saveState))
-    : localStorage.setItem("save", JSON.stringify(saveState));
+  saveStorage("save", saveState);
   // Reload page
   window.location.reload();
 }
 
 export function save() {
-  window.electronAPI
-    ? window.electronAPI?.saveKey("save", JSON.stringify(saveState))
-    : localStorage.setItem("save", JSON.stringify(saveState));
+  saveStorage("save", saveState);
 }
 
 export const SaveContext = createContext();

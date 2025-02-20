@@ -20,6 +20,7 @@
     "lodash": "^4.17.21",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-device-detect": "^2.2.3",
     "three": "0.162.0",
     "three-stdlib": "^2.28.7"
   },
@@ -54,7 +55,6 @@
     "npm": "^10.8.3",
     "p5": "^1.9.0",
     "raw-loader": "^4.0.2",
-    "react-device-detect": "^2.2.3",
     "react-refresh-typescript": "^2.0.9",
     "sass": "^1.79.1",
     "sass-loader": "^16.0.1",

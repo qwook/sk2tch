@@ -4,8 +4,9 @@
 
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { CheatsContext, CheatsProvider, useCheatState } from "./CheatsContext";
+import { ConVarContext, ConVarProvider } from "./ConVarContext";
 import { useContext } from "react";
+import { useCheatState } from "./ConVarHooks";
 
 function FakeCheat() {
   const [testing, setTesting] = useCheatState("testing", true);
@@ -14,19 +15,18 @@ function FakeCheat() {
 }
 
 function FakeCheatDisplay() {
-  const { cheatsMap, cheatsDispatch } = useContext(CheatsContext);
+  const { conVarMap: conVarMap, conVarDispatch: conVarDispatch } =
+    useContext(ConVarContext);
   return (
     <>
-      <div role="all-cheats">{JSON.stringify(cheatsMap)}</div>
-      {Object.keys(cheatsMap).map((name) => (
+      <div role="all-cheats">{JSON.stringify(conVarMap)}</div>
+      {Object.keys(conVarMap).map((name) => (
         <button
           role={`cheat-${name}`}
           value={name}
           key={name}
           onClick={(e) => {
-            console.log("hey");
-            console.log(name);
-            cheatsDispatch({
+            conVarDispatch({
               type: "set",
               payload: {
                 key: name,
@@ -43,10 +43,10 @@ function FakeCheatDisplay() {
 describe("cheats context", () => {
   test("set cheat", async () => {
     render(
-      <CheatsProvider>
+      <ConVarProvider>
         <FakeCheat />
         <FakeCheatDisplay />
-      </CheatsProvider>
+      </ConVarProvider>
     );
 
     expect(screen.getByRole("cheat-display").textContent).toBe("testing: true");
