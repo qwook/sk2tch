@@ -3,7 +3,14 @@
  * Frequently used for cheats and for testing. They are also used to store settings.
  */
 
-import { createContext, ReactNode, useEffect, useReducer } from "react";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+} from "react";
 import { saveStorage, loadStorage } from "../utils/SaveFile";
 import {
   conVarMetaMapReducer,
@@ -11,39 +18,114 @@ import {
   ConVarMapReducerAction,
   ConVarMetaMapReducerAction,
 } from "./ConVarReducers";
+import { createStore, useStore } from "zustand";
+import { produce } from "immer";
 
 // Todo: Combine conVarMap and conVarMetaMap into a single map.
 
-export const ConVarContext = createContext<{
-  conVarMap: any;
-  conVarDispatch: React.ActionDispatch<[ConVarMapReducerAction]>;
-  conVarMetaMap: { [key: string]: any };
-  conVarMetaDispatch: React.ActionDispatch<[ConVarMetaMapReducerAction]>;
-} | null>(null);
+export const ConVarContext = createContext(null);
 
-const initialConVarMetaMap = loadStorage("conVarMetaMap");
-export function ConVarProvider({ children }: { children: ReactNode }) {
-  // Actual stored ConVar values.
-  const [conVarMap, conVarDispatch] = useReducer(conVarMapReducer, {});
-  // Information about the ConVar.
-  const [conVarMetaMap, conVarMetaDispatch] = useReducer(
-    conVarMetaMapReducer,
-    initialConVarMetaMap
-  );
+const initialConVarMetaMap = loadStorage("conVarPersistMap");
+
+function ConVarSaver() {
+  const { conVarStore } = useContext(ConVarContext);
+  const persistMap = useStore(conVarStore, (state: any) => state.persistMap);
 
   useEffect(() => {
-    saveStorage("conVarMetaMap", conVarMetaMap);
-  }, [conVarMetaMap]);
+    saveStorage("conVarPersistMap", persistMap);
+  }, [persistMap]);
+
+  return <></>;
+}
+
+const defaultConVar = {
+  value: null,
+  sync: undefined,
+  persist: false,
+};
+
+const defaultPersist = {
+  value: null,
+  enabled: false,
+};
+
+export function ConVarProvider({ children }: { children: ReactNode }) {
+  const conVarStore = useMemo(
+    () =>
+      createStore((set) => ({
+        conVarMap: {},
+        persistMap: initialConVarMetaMap || {},
+        setConVar: (key, value) =>
+          set((state) => {
+            value =
+              value instanceof Function
+                ? value(state.conVarMap[key].value)
+                : value;
+            return produce(state, (draft) => {
+              if (draft.conVarMap[key]) {
+                draft.conVarMap[key].value = value;
+              } else {
+                draft.conVarMap[key] = produce(defaultConVar, (draft) => {
+                  draft.value = value;
+                });
+              }
+            });
+          }),
+        setSync: (key, getter, setter) =>
+          set((state) => {
+            return produce(state, (draft) => {
+              if (draft.conVarMap[key]) {
+                draft.conVarMap[key].sync = { getter, setter };
+              } else {
+                draft.conVarMap[key] = produce(defaultConVar, (draft) => {
+                  draft.sync = { getter, setter };
+                });
+              }
+            });
+          }),
+        clearSync: (key) =>
+          set((state) => {
+            return produce(state, (draft) => {
+              if (draft.conVarMap[key]) {
+                delete draft.conVarMap[key].sync;
+              }
+            });
+          }),
+        setPersistEnabled: (key, persist) =>
+          set((state) => {
+            return produce(state, (draft) => {
+              if (draft.persistMap[key]) {
+                draft.persistMap[key].enabled = persist;
+              } else {
+                draft.persistMap[key] = produce(defaultPersist, (draft) => {
+                  draft.enabled = persist;
+                });
+              }
+            });
+          }),
+        setPersistValue: (key, value) =>
+          set((state) => {
+            return produce(state, (draft) => {
+              if (draft.persistMap[key]) {
+                draft.persistMap[key].value = value;
+              } else {
+                draft.persistMap[key] = produce(defaultPersist, (draft) => {
+                  draft.value = value;
+                });
+              }
+            });
+          }),
+      })),
+    []
+  );
 
   return (
     <ConVarContext.Provider
       value={{
-        conVarMap: conVarMap,
-        conVarDispatch: conVarDispatch,
-        conVarMetaMap: conVarMetaMap,
-        conVarMetaDispatch: conVarMetaDispatch,
+        conVarStore,
       }}
     >
+      <ConVarSaver />
       {children}
     </ConVarContext.Provider>
   );

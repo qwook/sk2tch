@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 
 import { createContext } from "react";
 
@@ -13,6 +13,7 @@ const Layout = forwardRef(
       window.innerWidth / window.innerHeight < 1 ? "portrait" : "landscape"
     );
     const [size, setSize] = useState(1);
+    const layoutElement = useRef(null);
 
     useImperativeHandle(
       ref,
@@ -63,9 +64,10 @@ const Layout = forwardRef(
     }, []);
     return (
       <LayoutContext.Provider
-        value={{ size, orientation, targetWidth, targetHeight }}
+        value={{ layoutElement, size, orientation, targetWidth, targetHeight }}
       >
         <div
+          ref={layoutElement}
           style={{
             position: "absolute",
             left:

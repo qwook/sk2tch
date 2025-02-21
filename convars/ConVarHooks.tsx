@@ -2,58 +2,58 @@ import { useContext } from "react";
 import { ConVarContext } from "./ConVarContext";
 import { useEffect } from "react";
 import { useCallback } from "react";
+import { useStore, create } from "zustand";
+import { createStore } from "zustand/vanilla";
+import { useShallow } from "zustand/react/shallow";
+import { produce } from "immer";
 
-export function useCheatState(name, defaultState) {
-  const { conVarMap, conVarDispatch, conVarMetaMap, conVarMetaDispatch } =
-    useContext(ConVarContext);
+/*
 
-  useEffect(() => {
-    conVarDispatch({
-      type: "set",
-      payload: {
-        key: name,
-        value: conVarMetaMap[name]?.persist
-          ? conVarMetaMap[name].persistValue
-          : defaultState,
-      },
-    });
-    conVarMetaDispatch({
-      type: "clear-sync",
-      payload: {
-        key: name,
-      },
-    });
-    return () => {
-      conVarDispatch({
-        type: "delete",
-        payload: {
-          key: name,
-        },
-      });
-      conVarMetaDispatch({
-        type: "delete",
-        payload: {
-          key: name,
-        },
-      });
-    };
-  }, []);
+Notes: Fuck. Okay, because this is like a composite state...
+aka everything is stored in a single "dispatch" or state...
+this is going to cause a re-render to EVERYTHING.
+
+Update: Spent a whole day refactoring this bullsh!
+
+Now using stores! Which I probably should have been doing from the start.
+Will be using stores from now on.
+
+*/
+
+export function useCheatConsumer(name) {
+  const { conVarStore } = useContext(ConVarContext);
+  const setConVar = useStore(conVarStore, (state) => state.setConVar);
+  const conVar = useStore(
+    conVarStore,
+    useShallow((state) => state.conVarMap[name]?.value)
+  );
 
   return [
-    conVarMap[name],
-    useCallback(
-      (newState) => {
-        conVarDispatch({
-          type: "set",
-          payload: {
-            key: name,
-            value: newState,
-          },
-        });
-      },
-      [conVarMap, conVarDispatch]
-    ),
+    conVar,
+    useCallback((newState) => {
+      setConVar(name, newState);
+    }, []),
   ];
+}
+
+export function useCheatState(name, defaultState) {
+  const { conVarStore } = useContext(ConVarContext);
+  const [persistEnabled, persistValue, setConVar, clearSync] = useStore(
+    conVarStore,
+    useShallow((state) => [
+      state.persistMap && state.persistMap[name]?.enabled,
+      state.persistMap && state.persistMap[name]?.value,
+      state.setConVar,
+      state.clearSync,
+    ])
+  );
+
+  useEffect(() => {
+    setConVar(name, persistEnabled ? persistValue : defaultState);
+    clearSync();
+  }, []);
+
+  return useCheatConsumer(name);
 }
 
 /**
@@ -62,43 +62,20 @@ export function useCheatState(name, defaultState) {
  * Provide a getter and setter function. Registers a cheat that exists not as a react state.
  */
 export function useCheatSync(name, getter, setter) {
-  const {
-    conVarMetaDispatch: conVarMetaDispatch,
-    conVarDispatch: conVarDispatch,
-  } = useContext(ConVarContext);
+  const { conVarStore } = useContext(ConVarContext);
 
   const getterCb = useCallback(getter, []);
   const setterCb = useCallback(setter, []);
 
+  const [setSync, clearSync] = useStore(
+    conVarStore,
+    useShallow((state) => [state.setSync, state.clearSync])
+  );
+
   useEffect(() => {
-    conVarDispatch({
-      type: "set",
-      payload: {
-        key: name,
-        value: null,
-      },
-    });
-    conVarMetaDispatch({
-      type: "set-sync",
-      payload: {
-        key: name,
-        getter: getterCb,
-        setter: setterCb,
-      },
-    });
+    setSync(name, getterCb, setterCb);
     return () => {
-      conVarMetaDispatch({
-        type: "clear-sync",
-        payload: {
-          key: name,
-        },
-      });
-      conVarDispatch({
-        type: "delete",
-        payload: {
-          key: name,
-        },
-      });
+      clearSync(name);
     };
   }, [name, getterCb, setterCb]);
 }
@@ -110,29 +87,24 @@ export function useCheatSync(name, getter, setter) {
  * @param defaultValue
  */
 export function useSettingsState(name, defaultValue) {
-  const { conVarMetaDispatch } = useContext(ConVarContext);
+  const { conVarStore } = useContext(ConVarContext);
+
+  const [setPersistEnabled, setPersistValue] = useStore(
+    conVarStore,
+    useShallow((state) => [state.setPersistEnabled, state.setPersistValue])
+  );
 
   const [setting, setSetting] = useCheatState(name, defaultValue);
 
   useEffect(() => {
-    conVarMetaDispatch({
-      type: "set-persist",
-      payload: {
-        key: name,
-        value: true,
-      },
-    });
+    setPersistEnabled(name, true);
   }, []);
 
   useEffect(() => {
-    conVarMetaDispatch({
-      type: "set-persist-value",
-      payload: {
-        key: name,
-        value: setting,
-      },
-    });
+    setPersistValue(name, setting);
   }, [setting]);
 
   return [setting, setSetting];
 }
+
+export const useSettingsConsumer = useCheatConsumer;

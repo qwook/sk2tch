@@ -4,37 +4,48 @@ import { useEffect } from "react";
 import { ConVarContext } from "../convars/ConVarContext";
 import "./CheatsMenu.scss";
 import { useRef } from "react";
+import { useStore } from "zustand";
+import { useShallow } from "zustand/react/shallow";
 
 function CheatInput({ name }) {
-  const { conVarMap: cheatsMap, conVarDispatch: cheatsDispatch, conVarMetaMap: cheatsMetaMap, conVarMetaDispatch: cheatsMetaDispatch } =
-    useContext(ConVarContext);
+  const { conVarStore } = useContext(ConVarContext);
+  const [sync, setConVar, conVar] = useStore(
+    conVarStore,
+    useShallow((state) => [
+      state.conVarMap[name]?.sync,
+      state.setConVar,
+      state.conVarMap[name]?.value,
+    ])
+  );
+
   const textInput = useRef(null);
 
   useEffect(() => {
-    if (cheatsMetaMap[name].sync) {
+    if (sync) {
+      console.log(sync);
       const poll = setInterval(() => {
         if (document.activeElement === textInput.current) {
           return;
         }
-        textInput.current.value = JSON.stringify(
-          cheatsMetaMap[name].sync.getter()
-        );
+        textInput.current.value = JSON.stringify(sync.getter());
       }, 10);
       return () => {
         clearInterval(poll);
       };
     }
-  }, [cheatsMetaMap[name].sync]);
+  }, [sync]);
 
   useEffect(() => {
+    console.log("yo");
+    console.log(conVar);
     if (document.activeElement === textInput.current) {
       return;
     }
-    if (cheatsMetaMap[name].sync) {
+    if (sync) {
       return;
     }
-    textInput.current.value = JSON.stringify(cheatsMap[name]);
-  }, [cheatsMap[name], cheatsMetaMap[name].sync]);
+    textInput.current.value = JSON.stringify(conVar);
+  }, [conVar, sync]);
 
   return (
     <input
@@ -43,19 +54,10 @@ function CheatInput({ name }) {
       onKeyDown={(e) => {
         if ((e.code as KeyCode) === "Enter") {
           try {
-            console.log(cheatsMetaMap[name]);
-            if (cheatsMetaMap[name].sync) {
-              cheatsMetaMap[name].sync.setter(
-                JSON.parse(textInput.current.value)
-              );
+            if (sync) {
+              sync.setter(JSON.parse(textInput.current.value));
             } else {
-              cheatsDispatch({
-                type: "set",
-                payload: {
-                  key: name,
-                  value: JSON.parse(textInput.current.value),
-                },
-              });
+              setConVar(name, JSON.parse(textInput.current.value));
             }
           } catch (e) {
             console.log(e);
@@ -70,15 +72,23 @@ function CheatInput({ name }) {
 }
 
 function PersistInput({ name, disabled }) {
-  const { conVarMetaMap: cheatsMetaMap, conVarMetaDispatch: cheatsMetaDispatch } = useContext(ConVarContext);
+  const { conVarStore } = useContext(ConVarContext);
+  const [persistValue, setPersistValue] = useStore(
+    conVarStore,
+    useShallow((state) => [
+      state.persistMap[name]?.value,
+      state.setPersistValue,
+    ])
+  );
+
   const textInput = useRef(null);
 
   useEffect(() => {
     if (document.activeElement === textInput.current) {
       return;
     }
-    textInput.current.value = JSON.stringify(cheatsMetaMap[name].persistValue);
-  }, [cheatsMetaMap[name].persistValue]);
+    textInput.current.value = JSON.stringify(persistValue);
+  }, [persistValue]);
 
   return (
     <input
@@ -88,13 +98,7 @@ function PersistInput({ name, disabled }) {
       onKeyDown={(e) => {
         if ((e.code as KeyCode) === "Enter") {
           try {
-            cheatsMetaDispatch({
-              type: "set-persist-value",
-              payload: {
-                key: name,
-                value: JSON.parse(textInput.current.value),
-              },
-            });
+            setPersistValue(name, JSON.parse(textInput.current.value));
           } catch (e) {
             console.log(e);
           }
@@ -110,8 +114,15 @@ function PersistInput({ name, disabled }) {
 export function CheatsMenu() {
   const [show, setShow] = useState(false);
 
-  const { conVarMap: cheatsMap, conVarMetaMap: cheatsMetaMap, conVarMetaDispatch: cheatsMetaDispatch } =
-    useContext(ConVarContext);
+  const { conVarStore } = useContext(ConVarContext);
+  const [conVarMap, persistMap, setPersistEnabled] = useStore(
+    conVarStore,
+    useShallow((state) => [
+      state.conVarMap,
+      state.persistMap,
+      state.setPersistEnabled,
+    ])
+  );
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -156,7 +167,7 @@ export function CheatsMenu() {
         </thead>
         <tbody>
           {show &&
-            Object.keys(cheatsMap).map((key) => (
+            Object.keys(conVarMap).map((key) => (
               <tr key={key}>
                 <td>{key}</td>
                 <td>
@@ -165,21 +176,17 @@ export function CheatsMenu() {
                 <td>
                   <input
                     type="checkbox"
-                    defaultChecked={cheatsMetaMap[key]?.persist}
+                    defaultChecked={persistMap[key]?.enabled}
+                    checked={persistMap[key]?.enabled}
                     onChange={(e) => {
-                      cheatsMetaDispatch({
-                        type: "toggle-persist",
-                        payload: {
-                          key,
-                        },
-                      });
+                      setPersistEnabled(key, !persistMap[key]?.enabled);
                     }}
                   />
                 </td>
                 <td>
                   <PersistInput
                     name={key}
-                    disabled={!cheatsMetaMap[key]?.persist}
+                    disabled={!persistMap[key]?.enabled}
                   />
                 </td>
               </tr>
