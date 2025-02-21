@@ -2,7 +2,7 @@
 
 import { existsSync, fstat } from "fs";
 import { Sk2tchConfig } from "./sk2tch.config";
-import { exec } from "child_process";
+import { ChildProcess, exec } from "child_process";
 
 const path = require("path");
 const yargs = require("yargs");
@@ -29,6 +29,35 @@ async function getConfig(
   return config;
 }
 
+function spawnForwardConsole(command, args, options): ChildProcess {
+  const { env, ...otherOptions } = options;
+
+  const childProcess = spawn(command, args, {
+    stdio: ["inherit", "pipe", "pipe"],
+    shell: process.platform === "win32",
+    env: { ...process.env, ...env },
+    ...otherOptions,
+  });
+
+  childProcess.stdout.on("data", (data) => {
+    process.stdout.write(data);
+  });
+
+  childProcess.stderr.on("data", (data) => {
+    process.stderr.write(data);
+  });
+
+  childProcess.on("close", (code) => {
+    console.log(`Child process exited with code ${code}`);
+  });
+
+  childProcess.on("error", (err) => {
+    console.error("Failed to start child process:", err);
+  });
+
+  return childProcess;
+}
+
 async function spawnAsync(
   command,
   args,
@@ -38,28 +67,15 @@ async function spawnAsync(
     `${command} ${args.map((str) => str.replace(/ /g, "\\ ")).join(" ")}`
   );
   return new Promise((resolve, reject) => {
-    const { env, ...otherOptions } = options;
-
-    const childProcess = spawn(command, args, {
-      env: { ...process.env, ...env },
-      stdio: ["inherit", "pipe", "pipe"],
-      shell: process.platform === "win32",
-      ...otherOptions,
-    });
+    const childProcess = spawnForwardConsole(command, args, options);
 
     let stdout = "";
 
     childProcess.stdout.on("data", (data) => {
       stdout += data;
-      process.stdout.write(data);
-    });
-
-    childProcess.stderr.on("data", (data) => {
-      process.stderr.write(data);
     });
 
     childProcess.on("close", (code) => {
-      console.log(`Child process exited with code ${code}`);
       if (code === 0) {
         resolve({ code, stdout });
       } else {
@@ -68,7 +84,6 @@ async function spawnAsync(
     });
 
     childProcess.on("error", (err) => {
-      console.error("Failed to start child process:", err);
       reject(err);
     });
   });
@@ -147,7 +162,6 @@ yargs(hideBin(process.argv))
       });
     },
     async (argv) => {
-      console.log(`Building for ${argv.target}...`);
       const resolvedPath = path.resolve(argv.path as string);
 
       // Try to find the sk2tch config file.
@@ -157,24 +171,10 @@ yargs(hideBin(process.argv))
       );
 
       env["SK2TCH_CONFIG"] = JSON.stringify(config);
-      env["NODE_ENV"] = "production";
+      env["NODE_ENV"] = "development";
 
       let webpackTargetPaths = [""];
-      if (
-        argv.target === "osx" ||
-        argv.target === "osx-signed" ||
-        argv.target === "win"
-      ) {
-        webpackTargetPaths = ["../scripts/webpack/webpack.electron.cjs"];
-        env["TARGET"] = "electron";
-      } else if (argv.target === "web") {
-        webpackTargetPaths = ["../scripts/webpack/webpack.web.cjs"];
-      } else if (argv.target === "app") {
-        webpackTargetPaths = [
-          "../scripts/webpack/webpack.app.client.cjs",
-          "../scripts/webpack/webpack.app.server.cjs",
-        ];
-      }
+      webpackTargetPaths = ["../scripts/webpack/webpack.electron.cjs"];
 
       for (const webpackTargetPath of webpackTargetPaths) {
         const webpackPath = path.join(__dirname, webpackTargetPath);
@@ -189,60 +189,32 @@ yargs(hideBin(process.argv))
         );
       }
 
-      if (
-        argv.target === "osx" ||
-        argv.target === "osx-signed" ||
-        argv.target === "win"
-      ) {
-        console.log(`Creating electron app.`);
+      const webpackPath = path.join(
+        __dirname,
+        "../scripts/webpack/webpack.common.cjs"
+      );
 
-        await spawnAsync("npm", ["install"], {
-          cwd: path.join(resolvedPath, "dist/electron/package"),
+      const cwd = path.resolve(__dirname, "..");
+      let devServer = spawnForwardConsole(
+        "npx",
+        ["webpack", "--color", "serve", "--config", webpackPath],
+        {
+          cwd,
           env: { ...process.env, ...env },
-        });
-
-        const electronArgs = [
-          "electron-builder",
-          "--project",
-          path.join(resolvedPath, "dist/electron/package"),
-        ];
-
-        if (argv.target === "osx") {
-          electronArgs.push(
-            "--config",
-            path.join(
-              resolvedPath,
-              "dist/electron/package/electron-builder-dev.json"
-            )
-          );
-          electronArgs.push("--mac", "--universal");
-        } else if (argv.target === "osx-signed") {
-          env["APPLE_API_KEY"] = config.releasing.osx.appleApiKey;
-          env["APPLE_API_KEY_ID"] = config.releasing.osx.appleApiKeyId;
-          env["APPLE_API_ISSUER"] = config.releasing.osx.appleApiIssuer;
-          electronArgs.push(
-            "--config",
-            path.join(
-              resolvedPath,
-              "dist/electron/package/electron-builder.json"
-            )
-          );
-          electronArgs.push("--mac", "--universal");
-        } else if (argv.target === "win") {
-          electronArgs.push(
-            "--config",
-            path.join(
-              resolvedPath,
-              "dist/electron/package/electron-builder.json"
-            )
-          );
-          electronArgs.push("--win", "portable", "--x64");
         }
+      );
 
-        await spawnAsync("npx", electronArgs, {
-          env: { ...process.env, ...env },
-        });
-      }
+      await spawnAsync("npm", ["install", "."], {
+        env: { ...process.env, ...env },
+        cwd: path.join(resolvedPath, "dist/electron/package"),
+      });
+
+      await spawnAsync("npx", ["electron", "."], {
+        env: { ...process.env, ...env },
+        cwd: path.join(resolvedPath, "dist/electron/package"),
+      });
+
+      devServer.kill("SIGTERM");
     }
   )
   .command(
