@@ -6,7 +6,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { useFramePausible } from "./scheduler";
+import { useFramePausible, useFramePausibleCanvasless } from "./scheduler";
 
 interface TimelineKeyframe {
   duration: number;
@@ -54,7 +54,7 @@ export default function useTimelineAnimation(
     );
   }, [timeline]);
 
-  useFramePausible((_state, delta) => {
+  useFramePausibleCanvasless((delta) => {
     if (playing === false) {
       return;
     }
@@ -71,7 +71,7 @@ export default function useTimelineAnimation(
       // If the starting edge of the timeline object is inbetween our range, call onStart.
       if (
         timelineObj.startTime >= startFrameTime &&
-        timelineObj.startTime <= endFrameTime
+        timelineObj.startTime < endFrameTime
       ) {
         if (timelineObj.onStart) {
           timelineObj.onStart();
@@ -90,8 +90,11 @@ export default function useTimelineAnimation(
         if (timelineObj.frameCallback) {
           timelineObj.frameCallback(
             delta,
-            (progressTime.current - timelineObj.startTime) /
-              timelineObj.duration
+            Math.min(
+              (progressTime.current - timelineObj.startTime) /
+                timelineObj.duration,
+              1
+            )
           );
         }
         hitFrame = true;
@@ -99,7 +102,7 @@ export default function useTimelineAnimation(
       // If the ending edge of the timeline object is inbetween our range, call onEnd.
       if (
         timelineObj.startTime + timelineObj.duration >= startFrameTime &&
-        timelineObj.startTime + timelineObj.duration <= endFrameTime
+        timelineObj.startTime + timelineObj.duration < endFrameTime
       ) {
         if (timelineObj.onEnd) {
           timelineObj.onEnd();

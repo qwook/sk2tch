@@ -9,3 +9,18 @@ declare module "*.vert" {
 declare module "*.txt" {
   export default string;
 }
+
+declare module "*.mp4" {
+  export default string;
+}
+
+declare module "*.mp3" {
+  export default string;
+}
+
+declare module "*.wav" {
+  export default string;
+}
+
+declare const helloWorld: RegExp;
+export = helloWorld;

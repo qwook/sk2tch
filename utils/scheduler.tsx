@@ -8,6 +8,7 @@
 import customEvents from "./customEvents";
 import { RenderCallback, useFrame } from "@react-three/fiber";
 import { useCallback, useEffect, useMemo, useRef } from "react";
+import * as Tone from "tone";
 
 // Todo: Figure out a better name for this? Maybe this is just a time library.
 // Todo: Pull this out into a context.
@@ -61,20 +62,25 @@ export function pausibleNow() {
   }
 }
 
+let audioPauseTime = 0;
 export function setPaused(paused: boolean) {
   customEvents.emit("pause", paused);
   if (paused) {
     gameTimeHistory =
       gameTimeHistory + (performance.now() - gameTimeSinceUnpaused);
+    audioPauseTime = Tone.now();
+    Tone.getTransport().pause(audioPauseTime);
+    console.log(audioPauseTime);
+    console.log("pause");
   } else {
     gameTimeSinceUnpaused = performance.now();
+    // Tone.getTransport().start(audioPauseTime);
+    Tone.getTransport().start();
   }
   isPaused = paused;
 }
 
-export function useFramePausibleCanvasless(
-  callback: (delta: number) => null,
-) {
+export function useFramePausibleCanvasless(callback: (delta: number) => void) {
   useEffect(() => {
     let animationFrame;
     let lastTime = performance.now();
@@ -82,7 +88,9 @@ export function useFramePausibleCanvasless(
       const time = performance.now();
       const deltaTime = time - lastTime;
       lastTime = time;
-      callback(deltaTime);
+      if (!isPaused) {
+        callback(deltaTime / 1000);
+      }
       animationFrame = requestAnimationFrame(frame);
     };
     frame();
@@ -92,9 +100,7 @@ export function useFramePausibleCanvasless(
   }, [callback]);
 }
 
-export function useFrameCanvasless(
-  callback: (delta: number) => void,
-) {
+export function useFrameCanvasless(callback: (delta: number) => void) {
   useEffect(() => {
     let animationFrame;
     let lastTime = performance.now();

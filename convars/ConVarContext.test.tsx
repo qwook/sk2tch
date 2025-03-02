@@ -8,10 +8,12 @@ import { ConVarContext, ConVarProvider } from "./ConVarContext";
 import { useContext } from "react";
 import { useCheatState } from "./ConVarHooks";
 
-function FakeCheat() {
-  const [testing, setTesting] = useCheatState("testing", true);
-  const [hiddenCheat, setHiddenCheat] = useCheatState("hidden-cheat", "yo");
-  return <div role="cheat-display">testing: {testing ? "true" : "false"}</div>;
+// Todo: Upgrade this to use the stores.
+
+// function FakeCheat() {
+//   const [testing, setTesting] = useCheatState("testing", true);
+//   const [hiddenCheat, setHiddenCheat] = useCheatState("hidden-cheat", "yo");
+//   return <div role="cheat-display">testing: {testing ? "true" : "false"}</div>;
 // }
 
 // function FakeCheatDisplay() {
