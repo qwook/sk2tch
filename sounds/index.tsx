@@ -9,6 +9,7 @@ import * as Tone from "tone";
 
 const SoundContext = createContext(null);
 const SoundBusContext = createContext(null);
+const SoundSampleCatchContext = createContext([]);
 
 export function SoundProvider({ children }) {
   const sounds = useRef({});
@@ -44,7 +45,23 @@ export function SoundProvider({ children }) {
     [sounds]
   );
 
-  const getSound = useCallback<(name: string) => Tone.Sampler>(
+  /**
+   * Helper function to easily stop all sounds and just play this sound (isolated by catches).
+   */
+  const playMusic = useCallback((name) => {
+    const sound = getSound(name);
+    if (sound) {
+      const soundCatch = (sound as unknown as { catch: Tone.Player[] }).catch;
+      if (soundCatch) {
+        for (const childSound of soundCatch) {
+          childSound.stop();
+        }
+      }
+    }
+    playSound(name);
+  }, []);
+
+  const getSound = useCallback<(name: string) => Tone.Player | []>(
     (name) => {
       return sounds.current[name] as Tone.Sampler;
     },
@@ -54,7 +71,7 @@ export function SoundProvider({ children }) {
   return (
     <SoundBusContext.Provider value={Tone.getDestination()}>
       <SoundContext.Provider
-        value={{ addSound, removeSound, playSound, getSound }}
+        value={{ addSound, removeSound, playSound, getSound, playMusic }}
       >
         {children}
       </SoundContext.Provider>
@@ -116,7 +133,7 @@ function ToneToReactFactory(ToneClass) {
   };
 }
 
-export const PanVol = ToneToReactFactory(Tone.PanVol);
+export const SoundPanVol = ToneToReactFactory(Tone.PanVol);
 
 export function SoundSample({
   src,
@@ -137,8 +154,24 @@ export function SoundSample({
 }) {
   const { addSound, removeSound } = useContext(SoundContext);
   const destination = useContext(SoundBusContext);
+  const soundSampleCatch = useContext(SoundSampleCatchContext);
 
   const [player, setPlayer] = useState(null);
+
+  useEffect(() => {
+    if (!player) return;
+    if (soundSampleCatch.indexOf(player) === -1) {
+      soundSampleCatch.push(player);
+      player.catch = soundSampleCatch;
+    }
+    return () => {
+      const index = soundSampleCatch.indexOf(player);
+      if (index !== -1) {
+        soundSampleCatch.splice(index, 1);
+      }
+      player.catch = soundSampleCatch;
+    };
+  }, [player, soundSampleCatch]);
 
   useEffect(() => {
     const player = new Tone.Player(src);
@@ -176,4 +209,28 @@ export function SoundSample({
   }, [player, retrigger, loop]);
 
   return <>{children}</>;
+}
+
+/**
+ * SoundSampleCatch lets you grab all the sound samples underneath.
+ * @param
+ * @returns
+ */
+export function SoundSampleCatch({ name, children }) {
+  const { addSound, removeSound } = useContext(SoundContext);
+  const soundCatch = useMemo(() => [], []);
+
+  useEffect(() => {
+    const nameCached = name;
+    if (nameCached) addSound(nameCached, soundCatch);
+    return () => {
+      if (nameCached) removeSound(nameCached, soundCatch);
+    };
+  }, []);
+
+  return (
+    <SoundSampleCatchContext.Provider value={soundCatch}>
+      {children}
+    </SoundSampleCatchContext.Provider>
+  );
 }

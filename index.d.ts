@@ -21,6 +21,3 @@ declare module "*.mp3" {
 declare module "*.wav" {
   export default string;
 }
-
-declare const helloWorld: RegExp;
-export = helloWorld;

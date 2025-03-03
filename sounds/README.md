@@ -78,3 +78,39 @@ Somewhere else..
 
 }
 ```
+
+## Sketch 3
+
+```jsx
+<SoundProvider>
+  <SoundPanVol name="music">
+    <SoundSamplerCatch>
+      <Sound
+        name="soundtrack1"
+        volume="0.1"
+        resource={require("./soundtrack1.mp3")}
+        loop
+      />
+      <Sound
+        name="soundtrack2"
+        volume="0.1"
+        resource={require("./soundtrack2.mp3")}
+        loop
+      />
+    </SoundSamplerCatch>
+  </SoundPanVol>
+  <SoundPanVol name="sfx">
+    <Sound
+      name="shoot"
+      volume="0.1"
+      resource={require("./shoot.mp3")}
+      loop
+    />
+    <Sound
+      name="walk"
+      volume="0.1"
+      resource={require("./walk.mp3")}
+      loop
+    />
+</SoundProvider>
+```

@@ -2,6 +2,8 @@
  * timeline.tsx
  *
  * Allows for simple linear keyframe programmatic animations.
+ *
+ * In process of being Deprecated for Timeline2.
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
