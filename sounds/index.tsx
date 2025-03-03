@@ -25,7 +25,8 @@ export function SoundProvider({ children }) {
   );
 
   const removeSound = useCallback(
-    (name, sound) => {
+    (name) => {
+      sounds.current[name] = null;
       delete sounds.current[name];
     },
     [sounds]
@@ -54,7 +55,9 @@ export function SoundProvider({ children }) {
       const soundCatch = (sound as unknown as { catch: Tone.Player[] }).catch;
       if (soundCatch) {
         for (const childSound of soundCatch) {
-          childSound.stop();
+          if (childSound !== sound) {
+            childSound.stop();
+          }
         }
       }
     }
@@ -110,7 +113,7 @@ function ToneToReactFactory(ToneClass) {
         player.dispose();
         setSource(null);
 
-        if (nameCached) removeSound(nameCached, player);
+        if (nameCached) removeSound(nameCached);
       };
     }, [src]);
 

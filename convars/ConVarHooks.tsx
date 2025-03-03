@@ -36,6 +36,8 @@ export function useCheatConsumer(name) {
   ];
 }
 
+const loadedPersist = {};
+
 export function useCheatState(name, defaultState) {
   const { conVarStore } = useContext(ConVarContext);
   const [persistEnabled, persistValue, setConVar, clearSync] = useStore(
@@ -48,8 +50,12 @@ export function useCheatState(name, defaultState) {
     ])
   );
 
-  useEffect(() => {
+  if (!loadedPersist[name]) {
+    loadedPersist[name] = true;
     setConVar(name, persistEnabled ? persistValue : defaultState);
+  }
+
+  useEffect(() => {
     clearSync();
   }, []);
 
