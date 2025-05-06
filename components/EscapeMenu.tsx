@@ -20,7 +20,7 @@ export function useEscapeMenu() {
   return useContext(EscapeMenuContext);
 }
 
-export function EscapeMenu({ menu }) {
+export function EscapeMenu({ menu, children }) {
   const [escapeMenuVisible, setEscapeMenuVisible] = useState(false);
 
   useEffect(() => {
@@ -46,6 +46,7 @@ export function EscapeMenu({ menu }) {
       value={{ escapeMenuVisible, setEscapeMenuVisible }}
     >
       {escapeMenuVisible && menu()}
+      {children}
     </EscapeMenuContext.Provider>
   );
 }

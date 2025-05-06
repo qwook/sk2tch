@@ -36,13 +36,20 @@ export function useCheatConsumer(name) {
   ];
 }
 
-const loadedPersist = {};
-
 export function useCheatState(name, defaultState) {
   const { conVarStore } = useContext(ConVarContext);
-  const [persistEnabled, persistValue, setConVar, clearSync] = useStore(
+  const [
+    loadedPersist,
+    setLoadedPersist,
+    persistEnabled,
+    persistValue,
+    setConVar,
+    clearSync,
+  ] = useStore(
     conVarStore,
     useShallow((state) => [
+      state.loadedPersist,
+      state.setLoadedPersist,
       state.persistMap && state.persistMap[name]?.enabled,
       state.persistMap && state.persistMap[name]?.value,
       state.setConVar,
@@ -51,7 +58,7 @@ export function useCheatState(name, defaultState) {
   );
 
   if (!loadedPersist[name]) {
-    loadedPersist[name] = true;
+    setLoadedPersist(name);
     setConVar(name, persistEnabled ? persistValue : defaultState);
   }
 

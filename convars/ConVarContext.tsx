@@ -18,14 +18,16 @@ import { produce } from "immer";
 // Todo: Combine conVarMap and conVarMetaMap into a single map.
 
 export const ConVarContext = createContext<{
-  conVarStore: StoreApi<ReturnType<typeof ConVarStore>>;
+  conVarStore: StoreApi<ReturnType<ReturnType<typeof ConVarStore>>>;
 }>(null);
 
-const initialConVarMetaMap = loadStorage("conVarPersistMap");
+// const initialConVarMetaMap = loadStorage("conVarPersistMap");
 
-const ConVarStore = (set) => ({
+const ConVarStore = (persistMap) => (set) => ({
   conVarMap: {},
-  persistMap: initialConVarMetaMap || {},
+  // persistMap: {},
+  persistMap,
+  loadedPersist: {},
   setConVar: (key, value) =>
     set((state) => {
       value =
@@ -84,6 +86,20 @@ const ConVarStore = (set) => ({
         }
       });
     }),
+  setPersistMap: (persistMap) => {
+    set((state) => {
+      return produce(state, (draft) => {
+        draft.persistmap = persistMap;
+      });
+    });
+  },
+  setLoadedPersist: (key) => {
+    set((state) => {
+      return produce(state, (draft) => {
+        draft.loadedPersist[key] = true;
+      });
+    });
+  },
 });
 
 function ConVarSaver() {
@@ -109,7 +125,11 @@ const defaultPersist = {
 };
 
 export function ConVarProvider({ children }: { children: ReactNode }) {
-  const conVarStore = useMemo(() => createStore(ConVarStore), []);
+  const conVarStore = useMemo(
+    () => createStore(ConVarStore(loadStorage("conVarPersistMap"))),
+    []
+  );
+  const persistMap = useStore(conVarStore, (state: any) => state.persistMap);
 
   return (
     <ConVarContext.Provider

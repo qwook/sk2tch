@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-export function DragAndDrop({ onDropJsonFile }) {
+export function FileDrop({ onDropJsonFile }) {
   useEffect(() => {
     const dragover = (e) => {
       var dt = e.dataTransfer;

@@ -6,10 +6,20 @@ import { useCallback } from "react";
 import { useRef } from "react";
 import { useEffect } from "react";
 import * as Tone from "tone";
+import { unmute } from "./unmute";
 
 const SoundContext = createContext(null);
 const SoundBusContext = createContext(null);
 const SoundSampleCatchContext = createContext([]);
+
+unmute(Tone.getContext().rawContext, true, false);
+
+global.toneStarted = false;
+document.body.addEventListener("click", async () => {
+  if (global.toneStarted) return;
+  global.toneStarted = true;
+  await Tone.start();
+});
 
 export function SoundProvider({ children }) {
   const sounds = useRef({});

@@ -14,11 +14,16 @@ import * as Tone from "tone";
 // Todo: Pull this out into a context.
 let isPaused = false;
 
-type TimeoutCallbackFunction = () => void;
 type CancelFunction = () => void;
 
+export function sleepPausible(delay) {
+  return new Promise((resolve, reject) => {
+    setTimeoutPausible(resolve, delay);
+  });
+}
+
 export function setTimeoutPausible(
-  callback: TimeoutCallbackFunction,
+  callback: Function,
   timeout: number
 ): CancelFunction {
   timeout = timeout || 0;
@@ -78,6 +83,32 @@ export function setPaused(paused: boolean) {
     Tone.getTransport().start();
   }
   isPaused = paused;
+}
+
+export function useFramePausibleCanvaslessAsync(
+  callback: (delta: number) => Promise<void>
+) {
+  useEffect(() => {
+    let cancelledEarly = false;
+    let animationFrame;
+    let lastTime = performance.now();
+    const frame = async () => {
+      const time = performance.now();
+      const deltaTime = time - lastTime;
+      lastTime = time;
+      if (cancelledEarly) return;
+      if (!isPaused) {
+        await callback(deltaTime / 1000);
+      }
+      if (cancelledEarly) return;
+      animationFrame = requestAnimationFrame(frame);
+    };
+    frame();
+    return () => {
+      cancelledEarly = true;
+      cancelAnimationFrame(animationFrame);
+    };
+  }, [callback]);
 }
 
 export function useFramePausibleCanvasless(callback: (delta: number) => void) {
