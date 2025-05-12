@@ -24,7 +24,8 @@ export function sleepPausible(delay) {
 
 export function setTimeoutPausible(
   callback: Function,
-  timeout: number
+  timeout: number,
+  pausible: boolean = true
 ): CancelFunction {
   timeout = timeout || 0;
   let lastTime = performance.now();
@@ -33,7 +34,7 @@ export function setTimeoutPausible(
 
   function tick() {
     const now = performance.now();
-    if (!isPaused) {
+    if (!isPaused || !pausible) {
       elapsedTime += now - lastTime;
     }
     lastTime = now;
@@ -55,6 +56,27 @@ export function setTimeoutPausible(
 
 export function clearTimeoutPausible(cancel: CancelFunction) {
   cancel();
+}
+
+export function setIntervalPausible(
+  callback: Function,
+  timeout: number,
+  pausible: boolean = true
+): CancelFunction {
+  let cancel;
+
+  function tick() {
+    cancel = setTimeoutPausible(() => {
+      callback();
+      tick();
+    }, timeout, pausible);
+  }
+
+  tick();
+
+  return () => {
+    cancel();
+  };
 }
 
 let gameTimeHistory = 0;

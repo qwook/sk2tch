@@ -173,7 +173,7 @@ export default function Window(props) {
           zIndex: zOrder.indexOf(props.name),
           textAlign: "left",
           // overflow: "hidden",
-          border: `${size}px solid #245DDA`,
+          border: `${size*2}px solid #245DDA`,
           borderRadius: 12 * size,
           boxShadow: `${5 * size}px ${5 * size}px ${10 * size}px -${
             5 * size
@@ -205,6 +205,7 @@ export default function Window(props) {
       }}
     >
       <div
+        className="cursor-move"
         style={
           props.topBarStyle || {
             padding: `${10 * size}px`,
@@ -212,7 +213,7 @@ export default function Window(props) {
             background: "linear-gradient(90deg, #245DDA 0%, #4F9FDF 100%)",
             color: "white",
             userSelect: "none",
-            cursor: "move",
+            // cursor: "move",
             fontSize: 14 * size,
           }
         }
@@ -258,17 +259,17 @@ export default function Window(props) {
       >
         {props.title}
         <div
+          className="cursor-pointer close-button"
           style={
             props.closeButtonStyle || {
               position: "absolute",
               top: 3 * size,
               right: 3 * size,
-              background: "red",
               padding: `${5 * size}px ${10 * size}px`,
               fontWeight: "bold",
               borderRadius: 6 * size,
               border: `${2 * size}px solid white`,
-              cursor: "pointer",
+              // cursor: "pointer",
             }
           }
           onMouseDown={(e) => {

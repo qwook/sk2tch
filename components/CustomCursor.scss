@@ -5,8 +5,16 @@
   .login-button,
   .help-button,
   .chat-choice,
-  .pointer {
+  input[type="text"],
+  input[type="password"],
+  .cursor-move,
+  .cursor-pointer {
     cursor: none;
   }
-  cursor: none;
+  // cursor: none;
+}
+
+img {
+  user-select: none;
+  -webkit-user-drag: none;
 }
