@@ -1,8 +1,22 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Vector2 } from "three";
 import { setIntervalPausible, useFrameCanvasless } from "../utils/scheduler";
 import "./CustomCursor.scss";
 import { isMobile } from "react-device-detect";
+
+const CustomCursorContext = createContext({});
+
+export function CustomCursorProvider({children}) {
+  const [busy, setBusy] = useState(0);
+
+  return <CustomCursorContext.Provider value={{busy, setBusy}} >
+    {children}
+  </CustomCursorContext.Provider>
+}
+
+export function useCustomCursor() {
+  return useContext(CustomCursorContext);
+}
 
 export function CustomCursor({ cursorMap, children }) {
   const wrapper = useRef();
@@ -12,6 +26,26 @@ export function CustomCursor({ cursorMap, children }) {
   const currentCursor = useRef(0);
   const currentCursorPosition = useRef({x: 0, y: 0});
   const goalCursorPosition = useRef({x: 0, y: 0});
+
+  const {busy, setBusy} = useCustomCursor();
+  const busyRef = useRef(false);
+  busyRef.current = busy;
+
+  useEffect(() => {
+    if (!cursorMap) return;
+    let cursor = currentCursor.current;
+
+    if (busy) {
+      cursor = "busy";
+    }
+
+    if (!cursorMap[cursor]) return;
+
+    const currentSprite = sprites.current[currentTrail.current];
+    currentSprite.style.top = -(cursorMap[cursor].offsetY || 0) + "px";
+    currentSprite.style.left = -(cursorMap[cursor].offsetX || 0) + "px";
+    currentSprite.style.backgroundImage = `url(${cursorMap[cursor].img})`;
+  }, [busy, cursorMap])
 
   useEffect(() => {
     const mouseMove = (e) => {
@@ -54,6 +88,10 @@ export function CustomCursor({ cursorMap, children }) {
           return;
         }
       }
+      if (busyRef.current) {
+        cursor = "busy";
+      }
+
       currentCursor.current = cursor;
 
       currentSprite.style.top = -(cursorMap[cursor].offsetY || 0) + "px";

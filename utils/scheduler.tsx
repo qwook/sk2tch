@@ -106,6 +106,7 @@ export function setPaused(paused: boolean) {
   }
   isPaused = paused;
 }
+setPaused(isPaused);
 
 export function useFramePausibleCanvaslessAsync(
   callback: (delta: number) => Promise<void>

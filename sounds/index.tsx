@@ -156,6 +156,7 @@ export function SoundSample({
   pool = 1, // How many of these sounds are allowed to play at one time.
   retrigger,
   loop,
+  volume = 1,
 }: {
   src: any;
   name?: any;
@@ -164,6 +165,7 @@ export function SoundSample({
   pool: number;
   retrigger: any;
   loop: any;
+  volume: number;
 }) {
   const { addSound, removeSound } = useContext(SoundContext);
   const destination = useContext(SoundBusContext);
@@ -219,7 +221,8 @@ export function SoundSample({
     player.retrigger = retrigger;
     player.loop = loop;
     player.playbackRate = playbackRate;
-  }, [player, retrigger, loop]);
+    player.volume.value = volume;
+  }, [player, retrigger, loop, volume]);
 
   return <>{children}</>;
 }

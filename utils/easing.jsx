@@ -49,3 +49,11 @@ export function easeInOutExpo(x) {
 export function easeInOutQuad(x) {
   return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
 }
+
+export function easeInQuad(x) {
+  return x * x;
+}
+
+export function easeInQuint(x) {
+  return x * x * x * x * x;
+}
