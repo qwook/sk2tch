@@ -6,6 +6,8 @@ export interface Sk2tchConfig {
   output: string;
   icon?: string;
 
+  electron?: string;
+
   // Used if this sketch has it's own hosted server.
   server?: string;
   pages?: {

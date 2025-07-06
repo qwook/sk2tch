@@ -35,6 +35,10 @@ const createWindow = () => {
 
   win.setAspectRatio(800 / 600);
 
+  ipcMain.on("app-exe-path", (event) => {
+    event.returnValue = app.getPath("exe");
+  })
+
   ipcMain.on("set-fullscreen", (event, arg) => {
     win.setFullScreen(arg);
   });
@@ -109,5 +113,6 @@ app.whenReady().then(() => {
   }
 });
 
-app.commandLine.appendSwitch("disable-software-rasterizer");
-steamworks.electronEnableSteamOverlay();
+// app.commandLine.appendSwitch("disable-software-rasterizer");
+app.allowRendererProcessReuse = false
+// steamworks.electronEnableSteamOverlay();

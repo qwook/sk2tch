@@ -12,5 +12,6 @@ window.electronAPI = {
   quitApp: () => ipcRenderer.send("quit-app"),
   saveKey: (key, value) => ipcRenderer.send("save-key", key, value),
   loadKey: (key) => ipcRenderer.sendSync("load-key", key) || null,
+  appExePath: () => ipcRenderer.sendSync("app-exe-path") || null,
   steamworks: init,
 };
