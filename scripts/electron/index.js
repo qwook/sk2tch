@@ -31,7 +31,14 @@ const createWindow = () => {
       contextIsolation: false,
       nodeIntegration: true,
     },
+    kiosk: $__KIOSK__,
   });
+
+  if ($__KIOSK__) {
+    win.on("close", (event) => {
+      event.preventDefault();
+    })
+  }
 
   win.setAspectRatio(800 / 600);
 

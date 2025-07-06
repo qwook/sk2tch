@@ -7,6 +7,8 @@ export interface Sk2tchConfig {
   icon?: string;
 
   electron?: string;
+  // Should the electron app be compiled as a kiosk?
+  kiosk?: boolean;
 
   // Used if this sketch has it's own hosted server.
   server?: string;

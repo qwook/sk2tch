@@ -8,11 +8,9 @@ const path = require("path");
 const sk2tchConfig = JSON.parse(process.env["SK2TCH_CONFIG"]);
 
 module.exports = merge(common, {
-  module: {
-    rules: [{
-      test: /\.node$/,
-      loader: "node-loader",
-    }, ],
+  output: {
+    path: path.join(sk2tchConfig.output, "electron", "package", "game"),
+    filename: "[name].js",
   },
   plugins: [
     new CopyWebpackPlugin({
@@ -31,9 +29,10 @@ module.exports = merge(common, {
           transform(content) {
             return content
               .toString()
-              .replace("$__APP_ID__", sk2tchConfig.releasing.appId)
-              .replace("$__APP_PRODUCT_NAME__", sk2tchConfig.name)
-              .replace("$__APP_CODE__", sk2tchConfig.code);
+              .replace(/\$__APP_ID__/g, sk2tchConfig.releasing.appId)
+              .replace(/\$__APP_PRODUCT_NAME__/g, sk2tchConfig.name)
+              .replace(/\$__APP_CODE__/g, sk2tchConfig.code)
+              .replace(/\$__KIOSK__/g, sk2tchConfig.kiosk ? "true" : "false");
           },
         },
         ...(sk2tchConfig.icon ?

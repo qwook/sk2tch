@@ -17,7 +17,7 @@ module.exports = merge(common, {
   entry: {
     preload: sk2tchConfig.electron ? [
       sk2tchConfig.electron,
-    ] : [], //, webpackHotMiddleware + "?name=bundle"],
+    ] : [],
   },
   output: {
     // path: path.join(sk2tchConfig.output, "electron", "package", "game"),
@@ -34,35 +34,4 @@ module.exports = merge(common, {
       loader: "node-loader",
     }, ],
   },
-  plugins: [
-    new CopyWebpackPlugin({
-      patterns: [{
-          from: path.join(__dirname, "../electron/*").replace(/\\/g, "/"),
-          to: ({
-            context,
-            absoluteFilename
-          }) => {
-            return path.join(
-              sk2tchConfig.output,
-              "electron/package",
-              "[name][ext]"
-            );
-          },
-          transform(content) {
-            return content
-              .toString()
-              .replace("$__APP_ID__", sk2tchConfig.releasing.appId)
-              .replace("$__APP_PRODUCT_NAME__", sk2tchConfig.name)
-              .replace("$__APP_CODE__", sk2tchConfig.code);
-          },
-        },
-        ...(sk2tchConfig.icon ?
-          [{
-            from: sk2tchConfig.icon,
-            to: path.join(sk2tchConfig.output, "electron/package/icon.png"),
-          }, ] :
-          []),
-      ],
-    }),
-  ],
 });
