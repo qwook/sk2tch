@@ -175,7 +175,10 @@ yargs(hideBin(process.argv))
       env["NODE_ENV"] = "development";
 
       let webpackTargetPaths = [""];
-      webpackTargetPaths = ["../scripts/webpack/webpack.electron.preloader.cjs"];
+      webpackTargetPaths = [
+        "../scripts/webpack/webpack.electron.cjs",
+        "../scripts/webpack/webpack.electron.preloader.cjs",
+      ];
 
       const cwd = path.resolve(__dirname, "..");
 
@@ -255,7 +258,10 @@ yargs(hideBin(process.argv))
         argv.target === "osx-signed" ||
         argv.target === "win"
       ) {
-        webpackTargetPaths = ["../scripts/webpack/webpack.electron.cjs", "../scripts/webpack/webpack.electron.preloader.cjs"];
+        webpackTargetPaths = [
+          "../scripts/webpack/webpack.electron.cjs",
+          "../scripts/webpack/webpack.electron.preloader.cjs",
+        ];
         env["TARGET"] = "electron";
       } else if (argv.target === "web") {
         webpackTargetPaths = ["../scripts/webpack/webpack.web.cjs"];
