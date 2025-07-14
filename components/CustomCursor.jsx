@@ -3,13 +3,16 @@ import { Vector2 } from "three";
 import { setIntervalPausible, useFrameCanvasless } from "../utils/scheduler";
 import "./CustomCursor.scss";
 import { isMobile } from "react-device-detect";
+import escapeCssUrl from "../utils/escapeCssUrl";
+import _ from "lodash";
 
 const CustomCursorContext = createContext({});
 
 export function CustomCursorProvider({children}) {
   const [busy, setBusy] = useState(0);
+  const [hidden, setHidden] = useState(0);
 
-  return <CustomCursorContext.Provider value={{busy, setBusy}} >
+  return <CustomCursorContext.Provider value={{busy, setBusy, hidden, setHidden}} >
     {children}
   </CustomCursorContext.Provider>
 }
@@ -17,6 +20,12 @@ export function CustomCursorProvider({children}) {
 export function useCustomCursor() {
   return useContext(CustomCursorContext);
 }
+
+const getClosest = _.throttle((target) => {
+  return target.closest(
+        ".cursor-pointer, .cursor-move, .cursor-none, input[type='text'], input[type='password']"
+      );
+}, 200);
 
 export function CustomCursor({ cursorMap, children }) {
   const wrapper = useRef();
@@ -27,7 +36,7 @@ export function CustomCursor({ cursorMap, children }) {
   const currentCursorPosition = useRef({x: 0, y: 0});
   const goalCursorPosition = useRef({x: 0, y: 0});
 
-  const {busy, setBusy} = useCustomCursor();
+  const {busy, hidden} = useCustomCursor();
   const busyRef = useRef(false);
   busyRef.current = busy;
 
@@ -44,12 +53,16 @@ export function CustomCursor({ cursorMap, children }) {
     const currentSprite = sprites.current[currentTrail.current];
     currentSprite.style.top = -(cursorMap[cursor].offsetY || 0) + "px";
     currentSprite.style.left = -(cursorMap[cursor].offsetX || 0) + "px";
-    currentSprite.style.backgroundImage = `url(${cursorMap[cursor].img})`;
-  }, [busy, cursorMap])
+    if (hidden) {
+      currentSprite.style.backgroundImage = "";
+    } else {
+      currentSprite.style.backgroundImage = `url(${escapeCssUrl(cursorMap[cursor].img)})`;
+    }
+  }, [busy, hidden, cursorMap])
 
   useEffect(() => {
     const mouseMove = (e) => {
-      wrapper.current?.style.cursor = wrapper.current?.style.cursor !== "none" ? "none" : `url(${require("./1x1.png")}), default`;
+      wrapper.current?.style.cursor = wrapper.current?.style.cursor !== "none" ? "none" : `url(${escapeCssUrl(require("./1x1.png"))}), default`;
 
       if (!sprites.current && sprites.current.length === 0) return;
       const currentSprite = sprites.current[currentTrail.current];
@@ -59,16 +72,14 @@ export function CustomCursor({ cursorMap, children }) {
       };
       currentCursorPosition.current = {...currentSprite.position};
       goalCursorPosition.current = {...currentSprite.position};
-      currentSprite.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+      currentSprite.style.transform = `translate(${e.clientX}px, ${e.clientY}px) scale(100%, 100%)`;
 
       // top: -(cursorMap[currentCursor].offsetY || 0),
       // left: -(cursorMap[currentCursor].offsetX || 0),
       // backgroundImage: `url(${cursorMap[currentCursor].img})`,
 
       let cursor = "default";
-      let closest = e.target.closest(
-        ".cursor-pointer, .cursor-move, .cursor-none, input[type='text'], input[type='password']"
-      );
+      let closest = getClosest(e.target);
       if (closest) {
         if (
           closest.tagName === "INPUT" &&
@@ -96,7 +107,7 @@ export function CustomCursor({ cursorMap, children }) {
 
       currentSprite.style.top = -(cursorMap[cursor].offsetY || 0) + "px";
       currentSprite.style.left = -(cursorMap[cursor].offsetX || 0) + "px";
-      currentSprite.style.backgroundImage = `url(${cursorMap[cursor].img})`;
+      currentSprite.style.backgroundImage = `url(${escapeCssUrl(cursorMap[cursor].img)})`;
     };
 
     document.addEventListener("pointermove", mouseMove);
@@ -170,7 +181,7 @@ export function CustomCursor({ cursorMap, children }) {
       y: origin.y,
     };
     currentCursorPosition.current = {...currentSprite.position};
-    currentSprite.style.transform = `translate(${origin.x}px, ${origin.y}px)`;
+    currentSprite.style.transform = `translate(${origin.x}px, ${origin.y}px) scale(100%, 100%)`;
 
   });
 
