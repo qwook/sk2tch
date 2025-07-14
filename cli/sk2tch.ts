@@ -17,6 +17,7 @@ async function getConfig(
 ): Promise<Sk2tchConfig> {
   const { default: config } = await import(configPath);
   config.entry = path.join(relativePath, config.entry);
+  config.electron = path.join(relativePath, config.electron);
   config.output = path.join(relativePath, config.output);
   config.icon = config.icon && path.join(relativePath, config.icon);
   config.server = config.server && path.join(relativePath, config.server);
@@ -174,7 +175,12 @@ yargs(hideBin(process.argv))
       env["NODE_ENV"] = "development";
 
       let webpackTargetPaths = [""];
-      webpackTargetPaths = ["../scripts/webpack/webpack.electron.cjs"];
+      webpackTargetPaths = [
+        "../scripts/webpack/webpack.electron.cjs",
+        "../scripts/webpack/webpack.electron.preloader.cjs",
+      ];
+
+      const cwd = path.resolve(__dirname, "..");
 
       for (const webpackTargetPath of webpackTargetPaths) {
         const webpackPath = path.join(__dirname, webpackTargetPath);
@@ -184,6 +190,7 @@ yargs(hideBin(process.argv))
           "npx",
           ["webpack", "--color", "--config", webpackPath],
           {
+            cwd,
             env: { ...process.env, ...env },
           }
         );
@@ -194,7 +201,6 @@ yargs(hideBin(process.argv))
         "../scripts/webpack/webpack.common.cjs"
       );
 
-      const cwd = path.resolve(__dirname, "..");
       let devServer = spawnForwardConsole(
         "npx",
         ["webpack", "--color", "serve", "--config", webpackPath],
@@ -252,7 +258,10 @@ yargs(hideBin(process.argv))
         argv.target === "osx-signed" ||
         argv.target === "win"
       ) {
-        webpackTargetPaths = ["../scripts/webpack/webpack.electron.cjs"];
+        webpackTargetPaths = [
+          "../scripts/webpack/webpack.electron.cjs",
+          "../scripts/webpack/webpack.electron.preloader.cjs",
+        ];
         env["TARGET"] = "electron";
       } else if (argv.target === "web") {
         webpackTargetPaths = ["../scripts/webpack/webpack.web.cjs"];
