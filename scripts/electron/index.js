@@ -56,6 +56,14 @@ const createWindow = () => {
     win.close();
   });
 
+  ipcMain.on("focus", () => {
+    win.show();
+  });
+  
+  ipcMain.on("blur", () => {
+    win.minimize();
+  });
+
   let memSave = {};
 
   ipcMain.on("save-key", (event, key, value) => {
