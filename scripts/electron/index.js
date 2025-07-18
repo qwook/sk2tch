@@ -48,6 +48,10 @@ const createWindow = () => {
     event.returnValue = app.getPath("exe");
   });
 
+  ipcMain.on("user-data-path", (event) => {
+    event.returnValue = app.getPath("userData");
+  });
+
   ipcMain.on("set-fullscreen", (event, arg) => {
     win.setFullScreen(arg);
   });
@@ -59,7 +63,7 @@ const createWindow = () => {
   ipcMain.on("focus", () => {
     win.restore();
   });
-  
+
   ipcMain.on("blur", () => {
     win.minimize();
   });
