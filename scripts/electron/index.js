@@ -57,7 +57,7 @@ const createWindow = () => {
   });
 
   ipcMain.on("focus", () => {
-    win.show();
+    win.restore();
   });
   
   ipcMain.on("blur", () => {
