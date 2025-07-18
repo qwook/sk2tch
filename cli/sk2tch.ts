@@ -17,7 +17,8 @@ async function getConfig(
 ): Promise<Sk2tchConfig> {
   const { default: config } = await import(configPath);
   config.entry = path.join(relativePath, config.entry);
-  config.electron = path.join(relativePath, config.electron);
+  config.electron &&
+    (config.electron = path.join(relativePath, config.electron));
   config.output = path.join(relativePath, config.output);
   config.icon = config.icon && path.join(relativePath, config.icon);
   config.server = config.server && path.join(relativePath, config.server);
@@ -90,6 +91,7 @@ async function spawnAsync(
   });
 }
 
+// console.log(hideBin(process.argv))
 // Define your commands
 yargs(hideBin(process.argv))
   .command(
@@ -125,7 +127,7 @@ yargs(hideBin(process.argv))
       env["SK2TCH_CONFIG"] = JSON.stringify(config);
       env["NODE_ENV"] = "development";
 
-      const cwd = path.resolve(__dirname, "..");
+      const cwd = process.cwd();
       if (config.server && argv.serve) {
         await spawnAsync("npx", ["tsx", config.server], {
           cwd,
