@@ -1,10 +1,6 @@
-import e from "express";
+import { useCallback, useMemo, useState } from "react";
+import { useFramePausibleCanvasless } from "../../utils/scheduler";
 import { Timeline, Timeline2 } from "./Timeline2";
-import { useMemo } from "react";
-import { useEffect } from "react";
-import { useState } from "react";
-import { useFramePausibleCanvasless } from "../utils/scheduler";
-import { useCallback } from "react";
 
 type TimelineOptions = {
   deps: [];

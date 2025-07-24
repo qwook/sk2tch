@@ -11,11 +11,10 @@ in LSO. Need to rethink it.
 
 */
 
-import React, { useContext, useEffect } from "react";
+import { useContext, useEffect } from "react";
 
 import EventEmitter from "events";
 import stripJsonComments from "strip-json-comments";
-import { builtInLanguages } from "../../games/horror/src/LanguageMenu";
 import { createContext } from "react";
 import { useState } from "react";
 
@@ -98,20 +97,8 @@ export namespace l10n {
     try {
       languageFile = await fetch(url);
       loadLanguageText(await languageFile.text());
-    } catch (e) {
-      // languageFile = await fetch(builtInLanguages[DEFAULT_LANGUAGE]);
-    }
+    } catch (e) {}
   }
-
-  // export async function loadLanguageKey(key) {
-  //   let languageFile;
-  //   try {
-  //     languageFile = await fetch(builtInLanguages[key]);
-  //     loadLanguageText(await languageFile.text());
-  //   } catch (e) {
-  //     // languageFile = await fetch(builtInLanguages[DEFAULT_LANGUAGE]);
-  //   }
-  // }
 
   export async function loadLanguageText(text) {
     let languageFile;

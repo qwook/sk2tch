@@ -4,7 +4,7 @@ try {
   install(process.env.GTAG);
 } catch (e) {}
 
-export function publishEvent(event, options = {}) {
+export function publishEvent(event: string, options = {}) {
   try {
     gtag("event", event, options);
     if (process.env.NODE_ENV === "development") {
@@ -14,7 +14,7 @@ export function publishEvent(event, options = {}) {
 }
 
 let eventTimers = {};
-export function startEventTimer(event) {
+export function startEventTimer(event: string) {
   try {
     if (eventTimers[event]) {
       return;
@@ -24,7 +24,7 @@ export function startEventTimer(event) {
   } catch (e) {}
 }
 
-export function stopEventTimer(event) {
+export function stopEventTimer(event: string) {
   try {
     if (eventTimers[event]) {
       publishEvent(`finish_${event}`, {

@@ -182,7 +182,7 @@ yargs(hideBin(process.argv))
         "../scripts/webpack/webpack.electron.preloader.cjs",
       ];
 
-      const cwd = path.resolve(__dirname, "..");
+      const cwd = process.cwd();
 
       for (const webpackTargetPath of webpackTargetPaths) {
         const webpackPath = path.join(__dirname, webpackTargetPath);
@@ -378,7 +378,7 @@ yargs(hideBin(process.argv))
         env["SK2TCH_CONFIG"] = JSON.stringify(config);
         env["NODE_ENV"] = "production";
 
-        const cwd = path.resolve(__dirname, "..");
+        const cwd = process.cwd();
         await spawnAsync(
           "npx",
           ["webpack", "--color", "--config", webpackPath],

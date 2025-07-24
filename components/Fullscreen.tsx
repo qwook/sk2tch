@@ -1,7 +1,7 @@
 import { isMobile } from "react-device-detect";
 import { useEffect } from "react";
 import screenfull from "screenfull";
-import { useSettingsState } from "../convars/ConVarHooks";
+import { useSettingsState } from "../features/convars/ConVarHooks";
 
 declare global {
   interface Window {

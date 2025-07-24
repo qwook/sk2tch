@@ -1,10 +1,12 @@
-import { useMemo } from "react";
-import { createContext } from "react";
-import { useContext } from "react";
-import { useState } from "react";
-import { useCallback } from "react";
-import { useRef } from "react";
-import { useEffect } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import * as Tone from "tone";
 import { unmute } from "./unmute";
 
@@ -76,7 +78,7 @@ export function SoundProvider({ children }) {
 
   const getSound = useCallback<(name: string) => Tone.Player | []>(
     (name) => {
-      return sounds.current[name] as Tone.Sampler;
+      return sounds.current[name] as Tone.Player;
     },
     [sounds]
   );

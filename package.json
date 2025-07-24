@@ -32,7 +32,8 @@
     "three": "^0.162.0",
     "three-stdlib": "^2.35.14",
     "tone": "^15.0.4",
-    "zustand": "^5.0.3"
+    "zustand": "^5.0.3",
+    "keyboard-event-key-type": "^1.5.0"
   },
   "dependencies": {
     "@electron/packager": "^18.1.3",
