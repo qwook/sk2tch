@@ -98,15 +98,15 @@ yargs(hideBin(process.argv))
     "dev [path]",
     "Start the development server",
     (yargs) => {
-      yargs.boolean("serve", {
-        describe: "To host on a local server.",
-        default: false,
-        type: "boolean",
-      });
       yargs.positional("path", {
         describe: "The path to start the dev server in",
         default: ".",
         type: "string",
+      });
+      yargs.option("serve", {
+        type: "boolean",
+        describe: "To host on a local server.",
+        default: false,
       });
     },
     async (argv) => {

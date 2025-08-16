@@ -5,7 +5,7 @@
  * outside a THREE.js component.
  */
 
-import customEvents from "./customEvents";
+import customEvents from "./custom-events";
 import { RenderCallback, useFrame } from "@react-three/fiber";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import * as Tone from "tone";
@@ -66,10 +66,14 @@ export function setIntervalPausible(
   let cancel;
 
   function tick() {
-    cancel = setTimeoutPausible(() => {
-      callback();
-      tick();
-    }, timeout, pausible);
+    cancel = setTimeoutPausible(
+      () => {
+        callback();
+        tick();
+      },
+      timeout,
+      pausible
+    );
   }
 
   tick();

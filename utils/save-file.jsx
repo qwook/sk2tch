@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-import cheats from "./cheats";
+import cheats from "../features/cheats/cheats";
 
 // Common load storage function.
 export function loadStorage(keyName) {
