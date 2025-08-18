@@ -262,12 +262,17 @@ yargs(hideBin(process.argv))
       ) {
         webpackTargetPaths = [
           "../scripts/webpack/webpack.electron.cjs",
-          "../scripts/webpack/webpack.electron.preloader.cjs",
         ];
+
+        if (config.electron) {
+          webpackTargetPaths.push("../scripts/webpack/webpack.electron.preloader.cjs");
+        }
         env["TARGET"] = "electron";
       } else if (argv.target === "web") {
         webpackTargetPaths = ["../scripts/webpack/webpack.web.cjs"];
       } else if (argv.target === "app") {
+        env["TARGET"] = "app";
+        env["DEBUG"] = "false";
         webpackTargetPaths = [
           "../scripts/webpack/webpack.app.client.cjs",
           "../scripts/webpack/webpack.app.server.cjs",

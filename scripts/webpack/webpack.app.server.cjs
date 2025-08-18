@@ -90,12 +90,6 @@ module.exports = {
     new webpack.IgnorePlugin({
       resourceRegExp: /\.git/,
     }),
-    new DefinePlugin({
-      "process.env": {
-        NODE_ENV: JSON.stringify(process.env.NODE_ENV),
-        TARGET: JSON.stringify(process.env.TARGET),
-        DEBUG: JSON.stringify(process.env.DEBUG),
-      },
-    }),
+    new webpack.EnvironmentPlugin(["NODE_ENV", "TARGET", "DEBUG"]),
   ],
 };

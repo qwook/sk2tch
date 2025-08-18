@@ -39,7 +39,10 @@ export default function serverBoilerplate(defaultPort, defer) {
   }
 
   const port = process.env.PORT || defaultPort || 9000;
-  server.listen(port, () => console.log(`App listening on port ${port}!`));
+  const host = process.env.HOST || "0.0.0.0";
+  server.listen(port, host, () =>
+    console.log(`App listening on ${host}:${port}!`)
+  );
 
   return { app, io, use };
 }
