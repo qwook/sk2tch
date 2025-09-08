@@ -3,14 +3,14 @@ import express from "express";
 import { createServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
 
-export default function serverBoilerplate(defaultPort, defer) {
+export default function serverBoilerplate(defaultPort, defer, { noIo }) {
   const app = express();
 
   // Create an HTTP server and attach Express to it
   const server = createServer(app);
 
   // Attach socket.io to the HTTP server
-  const io = new SocketIOServer(server);
+  const io = noIo ? null : new SocketIOServer(server);
 
   const use = () => {
     if (process.env.NODE_ENV === "development") {
@@ -44,5 +44,5 @@ export default function serverBoilerplate(defaultPort, defer) {
     console.log(`App listening on ${host}:${port}!`)
   );
 
-  return { app, io, use };
+  return { app, io, use, server };
 }

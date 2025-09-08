@@ -59,7 +59,7 @@ export function CustomCursor({ cursorMap, children }) {
     } else {
       currentSprite.style.backgroundImage = `url(${escapeCssUrl(cursorMap[cursor].img)})`;
     }
-    wrapper.current?.style.cursor = `${currentSprite.style.backgroundImage} ${cursorMap[cursor].offsetX || 0} ${cursorMap[cursor].offsetY || 0}, auto`;
+    wrapper.current && (wrapper.current.style.cursor = `${currentSprite.style.backgroundImage} ${cursorMap[cursor].offsetX || 0} ${cursorMap[cursor].offsetY || 0}, auto`);
   }, [busy, hidden, cursorMap])
 
   useEffect(() => {
@@ -114,12 +114,12 @@ export function CustomCursor({ cursorMap, children }) {
       if (!isMobile) {
         if (window.innerWidth - currentSprite.position.x < 40 || window.innerHeight - currentSprite.position.y < 40) {
           updateCursorSprite = true;
-          wrapper.current?.style.cursor = "none";
+          wrapper.current && (wrapper.current.style.cursor = "none");
           currentSprite.style.display = "block";
           currentSprite.style.opacity = 1;
           currentSprite.style.transform = `translate(${e.clientX}px, ${e.clientY}px) scale(100%, 100%)`;
         } else {
-          wrapper.current?.style.cursor = `url(${escapeCssUrl(cursorMap[cursor].img)}) ${cursorMap[cursor].offsetX || 0} ${cursorMap[cursor].offsetY || 0}, auto`;
+          wrapper.current && (wrapper.current.style.cursor = `url(${escapeCssUrl(cursorMap[cursor].img)}) ${cursorMap[cursor].offsetX || 0} ${cursorMap[cursor].offsetY || 0}, auto`);
           currentSprite.style.display = "none";
         }
       } else {
