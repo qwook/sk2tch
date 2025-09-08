@@ -16,7 +16,7 @@ Will be using stores from now on.
 
 */
 
-export function useCheatConsumer(name) {
+export function useCheatConsumer(name): [any, (value) => void] {
   const { conVarStore } = useContext(ConVarContext);
   const setConVar = useStore(conVarStore, (state) => state.setConVar);
   const conVar = useStore(
