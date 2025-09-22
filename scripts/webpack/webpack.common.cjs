@@ -8,6 +8,7 @@ const ReactRefreshTypeScript = require("react-refresh-typescript").default;
 const AssetPreloaderPlugin = require("../AssetPreloaderPlugin");
 const TerserPlugin = require("terser-webpack-plugin");
 const { HotModuleReplacementPlugin } = require("webpack");
+const WebpackFavicons = require("webpack-favicons");
 const fs = require("fs");
 
 const { DefinePlugin, ProvidePlugin } = webpack;
@@ -168,7 +169,25 @@ module.exports = {
         GTAG: JSON.stringify(sk2tchConfig.analytics?.googleTag || ""),
       },
     }),
+    ...(sk2tchConfig.icon
+      ? [
+          new WebpackFavicons({
+            src: sk2tchConfig.icon,
+            path: "img",
+            background: "#fff",
+            theme_color: "#007bbf",
+            icons: {
+              favicons: true,
+              android: true,
+              appleIcon: true,
+              appleStartup: true,
+              firefox: true,
+            },
+          }),
+        ]
+      : []),
     new HtmlWebpackPlugin({
+      favicon: sk2tchConfig.icon,
       template: path.resolve(__dirname, "../../index.html"),
       title: sk2tchConfig.name,
       chunks: ["bundle"],
