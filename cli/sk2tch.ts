@@ -175,6 +175,7 @@ yargs(hideBin(process.argv))
 
       env["SK2TCH_CONFIG"] = JSON.stringify(config);
       env["NODE_ENV"] = "development";
+      env["TARGET"] = "electron-dev";
 
       let webpackTargetPaths = [""];
       webpackTargetPaths = [

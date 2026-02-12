@@ -8,10 +8,11 @@
   input[type="text"],
   input[type="password"],
   .cursor-move,
+  .cursor-beam,
   .cursor-pointer {
-    // cursor: none;
+    cursor: inherit;
   }
-  // cursor: none;
+  cursor: inherit;
 }
 
 img {

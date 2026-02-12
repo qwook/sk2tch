@@ -3,7 +3,7 @@ import express from "express";
 import { createServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
 
-export default function serverBoilerplate(defaultPort, defer, { noIo }) {
+export default function serverBoilerplate(defaultPort, defer, { noIo } = {}) {
   const app = express();
 
   // Create an HTTP server and attach Express to it

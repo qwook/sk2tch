@@ -9,6 +9,17 @@ Notes:
 Localization is currently hardcoded to sv_cheats and the language menu
 in LSO. Need to rethink it.
 
+12/17/25
+So I am using this for AYMI right now and there's some interesting quirks.
+For one, the current language is set as a prop being passed in, I guess to
+decouple from using save states. This has an issue in that a "language menu"
+needs something drilled down to enable for changing the language.
+
+Decided expose the setting of text and key as part of the context.
+I don't like it but it's good.
+
+Also I am hating the fact that it's an enum why did I do that???
+
 */
 
 import { useContext, useEffect } from "react";
@@ -129,11 +140,15 @@ export namespace l10n {
     l10nEvents.emit("languageFileLoaded", currentLanguageFileProxy);
   }
 
+  export const Context = createContext({});
+
   export function L10nProvider({
     children,
     languages,
     languageText,
+    setLanguageText,
     currentLanguage,
+    setCurrentLanguage,
     defaultLanguage,
   }) {
     const [language, setLanguage] = useState(currentLanguageFileProxy);
@@ -166,13 +181,39 @@ export namespace l10n {
       }
     }, [languages, languageText, currentLanguage]);
 
-    return <Context.Provider value={{ language }}>{children}</Context.Provider>;
-  }
+    console.log(currentLanguage);
 
-  export const Context = createContext({});
+    return (
+      <Context.Provider
+        value={{
+          language,
+          languageText,
+          setLanguageText,
+          currentLanguage,
+          setCurrentLanguage,
+        }}
+      >
+        {children}
+      </Context.Provider>
+    );
+  }
 
   export function Text({ name, format }) {
     const { language } = useContext<any>(Context);
-    return <>{language[name].format(format || [])}</>;
+    return <>{language && language[name].format(format || [])}</>;
   }
+}
+
+export function useL10n(): any {
+  const context = useContext(l10n.Context);
+  return { ...context };
+}
+
+// Oh no.... HTML tags will need
+// https://github.com/pmndrs/drei/issues/1961#issuecomment-2375331091
+export function L10nText({ name, format, placeholder }) {
+  const { language } = useL10n();
+  return (
+    <>{(language[name].format(format || [])) || placeholder}</>
+  );
 }

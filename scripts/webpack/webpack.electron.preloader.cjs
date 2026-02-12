@@ -15,9 +15,9 @@ module.exports = merge(common, {
    preloader.
    */
   entry: {
-    preload: sk2tchConfig.electron ? [
-      sk2tchConfig.electron,
-    ] : [],
+    // preload: sk2tchConfig.electron ? [
+    //   sk2tchConfig.electron,
+    // ] : [],
   },
   output: {
     // path: path.join(sk2tchConfig.output, "electron", "package", "game"),

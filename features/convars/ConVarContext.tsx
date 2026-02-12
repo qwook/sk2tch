@@ -130,6 +130,8 @@ export function ConVarProvider({ children }: { children: ReactNode }) {
   );
   const persistMap = useStore(conVarStore, (state: any) => state.persistMap);
 
+  console.log("PROVIDING");
+
   return (
     <ConVarContext.Provider
       value={{

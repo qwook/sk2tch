@@ -1,4 +1,11 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Vector2 } from "three";
 import { setIntervalPausible, useFrameCanvasless } from "../utils/scheduler";
 import "./CustomCursor.scss";
@@ -8,14 +15,15 @@ import _ from "lodash";
 
 const CustomCursorContext = createContext({});
 
-
-export function CustomCursorProvider({children}) {
+export function CustomCursorProvider({ children }) {
   const [busy, setBusy] = useState(0);
   const [hidden, setHidden] = useState(0);
 
-  return <CustomCursorContext.Provider value={{busy, setBusy, hidden, setHidden}} >
-    {children}
-  </CustomCursorContext.Provider>
+  return (
+    <CustomCursorContext.Provider value={{ busy, setBusy, hidden, setHidden }}>
+      {children}
+    </CustomCursorContext.Provider>
+  );
 }
 
 export function useCustomCursor() {
@@ -24,8 +32,8 @@ export function useCustomCursor() {
 
 const getClosest = _.throttle((target) => {
   return target.closest(
-        ".cursor-pointer, .cursor-move, .cursor-none, input[type='text'], input[type='password']"
-      );
+    ".cursor-pointer, .cursor-move, .cursor-none, input[type='text'], input[type='password']",
+  );
 }, 20);
 
 export function CustomCursor({ cursorMap, children }) {
@@ -34,10 +42,10 @@ export function CustomCursor({ cursorMap, children }) {
   const sprites = useRef([]);
   const currentTrail = useRef(0);
   const currentCursor = useRef(0);
-  const currentCursorPosition = useRef({x: 0, y: 0});
-  const goalCursorPosition = useRef({x: 0, y: 0});
+  const currentCursorPosition = useRef({ x: 0, y: 0 });
+  const goalCursorPosition = useRef({ x: 0, y: 0 });
 
-  const {busy, hidden} = useCustomCursor();
+  const { busy, hidden } = useCustomCursor();
   const busyRef = useRef(false);
   busyRef.current = busy;
 
@@ -59,8 +67,9 @@ export function CustomCursor({ cursorMap, children }) {
     } else {
       currentSprite.style.backgroundImage = `url(${escapeCssUrl(cursorMap[cursor].img)})`;
     }
-    wrapper.current && (wrapper.current.style.cursor = `${currentSprite.style.backgroundImage} ${cursorMap[cursor].offsetX || 0} ${cursorMap[cursor].offsetY || 0}, auto`);
-  }, [busy, hidden, cursorMap])
+    wrapper.current &&
+      (wrapper.current.style.cursor = `${currentSprite.style.backgroundImage} ${cursorMap[cursor].offsetX || 0} ${cursorMap[cursor].offsetY || 0}, auto`);
+  }, [busy, hidden, cursorMap]);
 
   useEffect(() => {
     let touching;
@@ -112,14 +121,18 @@ export function CustomCursor({ cursorMap, children }) {
       let updateCursorSprite = false;
 
       if (!isMobile) {
-        if (window.innerWidth - currentSprite.position.x < 40 || window.innerHeight - currentSprite.position.y < 40) {
+        if (
+          window.innerWidth - currentSprite.position.x < 40 ||
+          window.innerHeight - currentSprite.position.y < 40
+        ) {
           updateCursorSprite = true;
           wrapper.current && (wrapper.current.style.cursor = "none");
           currentSprite.style.display = "block";
           currentSprite.style.opacity = 1;
           currentSprite.style.transform = `translate(${e.clientX}px, ${e.clientY}px) scale(100%, 100%)`;
         } else {
-          wrapper.current && (wrapper.current.style.cursor = `url(${escapeCssUrl(cursorMap[cursor].img)}) ${cursorMap[cursor].offsetX || 0} ${cursorMap[cursor].offsetY || 0}, auto`);
+          wrapper.current &&
+            (wrapper.current.style.cursor = `url(${escapeCssUrl(cursorMap[cursor].img)}) ${cursorMap[cursor].offsetX || 0} ${cursorMap[cursor].offsetY || 0}, auto`);
           currentSprite.style.display = "none";
         }
       } else {
@@ -147,12 +160,12 @@ export function CustomCursor({ cursorMap, children }) {
         };
       }
       touching = true;
-    }
+    };
     document.addEventListener("pointerdown", touchDown);
 
     const touchUp = (e) => {
       touching = false;
-    }
+    };
     document.addEventListener("pointerup", touchUp);
 
     // const cancelInterval = setIntervalPausible(
@@ -201,9 +214,13 @@ export function CustomCursor({ cursorMap, children }) {
 
     const currentSprite = sprites.current[currentTrail.current];
     const origin = new Vector2(
-      currentCursorPosition.current.x, currentCursorPosition.current.y
+      currentCursorPosition.current.x,
+      currentCursorPosition.current.y,
     );
-    const goal = new Vector2(goalCursorPosition.current.x, goalCursorPosition.current.y);
+    const goal = new Vector2(
+      goalCursorPosition.current.x,
+      goalCursorPosition.current.y,
+    );
     const movement = delta * 2;
     if (origin.distanceTo(goal) < movement) {
       origin.x = goal.x;
@@ -219,11 +236,13 @@ export function CustomCursor({ cursorMap, children }) {
       let closest = getClosest(target);
       if (closest) {
         if (
-          closest.tagName === "INPUT" &&
-          (closest.type === "password" || closest.type === "text")
+          (closest.tagName === "INPUT" &&
+            (closest.type === "password" || closest.type === "text")) ||
+          closest.classList.contains("cursor-beam")
         ) {
           cursor = "beam";
         }
+        console.log(closest);
         if (closest.classList.contains("cursor-pointer")) {
           cursor = "pointer";
         }
@@ -251,7 +270,7 @@ export function CustomCursor({ cursorMap, children }) {
       x: origin.x,
       y: origin.y,
     };
-    currentCursorPosition.current = {...currentSprite.position};
+    currentCursorPosition.current = { ...currentSprite.position };
     currentSprite.style.transform = `translate(${origin.x}px, ${origin.y}px) scale(100%, 100%)`;
 
     currentSprite.style.display = "block";
@@ -278,6 +297,7 @@ export function CustomCursor({ cursorMap, children }) {
       {trail.map((idx) => {
         return (
           <div
+            key={idx}
             className="custom-cursor-image"
             style={{
               zIndex: 2,
