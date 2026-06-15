@@ -29,6 +29,48 @@ module.exports = {
     path: path.join(sk2tchConfig.output, "app"),
     filename: "[name].js",
   },
+  optimization: {
+    splitChunks: {
+      chunks: "all",
+      cacheGroups: {
+        // Separate React-related libraries
+        react: {
+          test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+          name: "react",
+          chunks: "all",
+          priority: 20, // High priority for React chunk
+        },
+        // Separate Three.js
+        three: {
+          test: /[\\/]node_modules[\\/]three[\\/]/,
+          name: "three",
+          chunks: "all",
+          priority: 20, // High priority for Three.js chunk
+        },
+        // Separate Sk2tch.js
+        sk2tch: {
+          test: /[\\/]src[\\/]sk2tch[\\/]/,
+          name: "sk2tch",
+          chunks: "all",
+          priority: 20, // High priority for Sk2tch chunk
+        },
+        // Create a chunk for all other node_modules
+        vendors: {
+          test: /[\\/]node_modules[\\/]/,
+          name: "vendors",
+          chunks: "all",
+          priority: 10, // Lower priority than React and Three.js
+          reuseExistingChunk: true, // Reuse chunks if they are already split out
+        },
+      },
+    },
+    ...(process.env.NODE_ENV === "production"
+      ? {
+          minimize: false, // Enable minification (enabled by default in 'production' mode)
+          minimizer: [],
+        }
+      : {}),
+  },
   module: {
     rules: [
       {

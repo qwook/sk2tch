@@ -10,20 +10,6 @@ declare global {
 }
 
 export function Fullscreen() {
-  /*
-  useEffect(() => {
-    if (!isMobile && screenfull.isEnabled && screenfull.on && screenfull.off) {
-      const screenFullChange = () => {
-        setShowFullscreen(!isMobile && !screenfull.isFullscreen);
-      };
-      screenfull.on("change", screenFullChange);
-      return () => {
-        screenfull.off("change", screenFullChange);
-      };
-    }
-  }, []);
-  */
-
   const [fullscreen, setFullscreen] = useSettingsState("fullscreen", true);
 
   useEffect(() => {
@@ -31,7 +17,7 @@ export function Fullscreen() {
       setFullscreen(false);
     }
 
-    if (screenfull.isEnabled) {
+    if (screenfull.isEnabled && screenfull.on) {
       screenfull.on("change", () => {
         setFullscreen(screenfull.isFullscreen);
       });
@@ -40,7 +26,7 @@ export function Fullscreen() {
 
   useEffect(() => {
     (async () => {
-      if (screenfull.isEnabled) {
+      if (screenfull.isEnabled && screenfull.on) {
         if (fullscreen) {
           if (window.electronAPI) {
             window.electronAPI?.setFullscreen(true);

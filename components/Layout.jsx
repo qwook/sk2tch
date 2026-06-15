@@ -7,6 +7,7 @@ import {
 } from "react";
 
 import { createContext } from "react";
+import "./layout.scss";
 
 export const LayoutContext = createContext();
 
@@ -19,10 +20,10 @@ const Layout = forwardRef(
       noresize = false,
       children,
     },
-    ref
+    ref,
   ) => {
     const [orientation, setOrientation] = useState(
-      window.innerWidth / window.innerHeight < 1 ? "portrait" : "landscape"
+      window.innerWidth / window.innerHeight < 1 ? "portrait" : "landscape",
     );
     const [size, setSize] = useState(1);
     const layoutElement = useRef(null);
@@ -33,7 +34,7 @@ const Layout = forwardRef(
         orientation,
         size,
       }),
-      [orientation, size]
+      [orientation, size],
     );
 
     const [windowSize, setWindowSize] = useState({
@@ -55,24 +56,60 @@ const Layout = forwardRef(
           const orientation = landscapeOnly
             ? "landscape"
             : ratio < 1
-            ? "portrait"
-            : "landscape";
+              ? "portrait"
+              : "landscape";
           setOrientation(orientation);
+
+          let size = 0;
 
           if (orientation === "landscape") {
             if (ratio < targetWidth / targetHeight) {
               setSize(width / targetWidth);
+              size = width / targetWidth;
             } else {
               setSize(height / targetHeight);
+              size = height / targetHeight;
             }
           }
           if (orientation === "portrait") {
             if (ratio < targetHeight / targetWidth) {
               setSize(width / targetHeight);
+              size = width / targetHeight;
             } else {
               setSize(height / targetWidth);
+              size = height / targetWidth;
             }
           }
+
+          layoutElement.current.style.left =
+            Math.floor(
+              orientation === "landscape"
+                ? width / 2 - (targetWidth / 2) * size
+                : width / 2 - (targetHeight / 2) * size,
+            ) + "px";
+
+          layoutElement.current.style.top =
+            Math.floor(
+              orientation === "landscape"
+                ? height / 2 - (targetHeight / 2) * size
+                : height / 2 - (targetWidth / 2) * size,
+            ) + "px";
+
+          layoutElement.current.style.width =
+            Math.floor(
+              orientation === "landscape"
+                ? targetWidth * size
+                : targetHeight * size,
+            ) + "px";
+
+          layoutElement.current.style.height =
+            Math.floor(
+              orientation === "landscape"
+                ? targetHeight * size
+                : targetWidth * size,
+            ) + "px";
+
+          layoutElement.current.style.fontSize = size * 12 + "px";
         };
         window.addEventListener("resize", resize);
         resize();
@@ -80,41 +117,18 @@ const Layout = forwardRef(
           window.removeEventListener("resize", resize);
         };
       }
-    }, [noresize]);
+    }, [noresize, targetWidth, targetHeight]);
 
     return (
       <LayoutContext.Provider
         value={{ layoutElement, size, orientation, targetWidth, targetHeight }}
       >
-        <div
-          className="layout"
-          ref={layoutElement}
-          style={{
-            position: "absolute",
-            left:
-              orientation === "landscape"
-                ? windowSize.width / 2 - (targetWidth / 2) * size
-                : windowSize.width / 2 - (targetHeight / 2) * size,
-            top:
-              orientation === "landscape"
-                ? windowSize.height / 2 - (targetHeight / 2) * size
-                : windowSize.height / 2 - (targetWidth / 2) * size,
-            width:
-              orientation === "landscape"
-                ? targetWidth * size
-                : targetHeight * size,
-            height:
-              orientation === "landscape"
-                ? targetHeight * size
-                : targetWidth * size,
-            overflow: "hidden",
-          }}
-        >
+        <div className="layout" ref={layoutElement}>
           {children}
         </div>
       </LayoutContext.Provider>
     );
-  }
+  },
 );
 
 export default Layout;
