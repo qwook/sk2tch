@@ -28,6 +28,7 @@ import EventEmitter from "events";
 import stripJsonComments from "strip-json-comments";
 import { createContext } from "react";
 import { useState } from "react";
+import JSON5 from "json5";
 
 export class FormattableString extends String {
   template: string;
@@ -80,7 +81,7 @@ export namespace l10n {
   }
 
   export async function loadFallbackLanguageText(text) {
-    let languageFile = JSON.parse(stripJsonComments(text));
+    let languageFile = JSON5.parse(text);
 
     // eslint-disable-next-line no-eval
     // languageFile = eval(languageFile + ";text;");
@@ -114,7 +115,7 @@ export namespace l10n {
   export async function loadLanguageText(text) {
     let languageFile;
     try {
-      languageFile = JSON.parse(stripJsonComments(text));
+      languageFile = JSON5.parse(text);
     } catch (e) {
       console.log(e);
       console.log("Error loading language.");
@@ -167,7 +168,7 @@ export namespace l10n {
     useEffect(() => {
       (async () => {
         l10n.loadFallbackLanguageText(
-          await (await fetch(languages[defaultLanguage])).text()
+          await (await fetch(languages[defaultLanguage])).text(),
         );
         setShowGame(true);
       })();
@@ -213,7 +214,5 @@ export function useL10n(): any {
 // https://github.com/pmndrs/drei/issues/1961#issuecomment-2375331091
 export function L10nText({ name, format, placeholder }) {
   const { language } = useL10n();
-  return (
-    <>{(language[name].format(format || [])) || placeholder}</>
-  );
+  return <>{language[name].format(format || []) || placeholder}</>;
 }

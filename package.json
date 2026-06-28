@@ -62,6 +62,7 @@
     "http-live-simulator": "^1.0.8",
     "install": "^0.13.0",
     "jest-environment-jsdom": "^29.7.0",
+    "json5": "^2.2.3",
     "meshline": "^3.3.1",
     "mkdirp": "^3.0.1",
     "node-loader": "^2.1.0",
