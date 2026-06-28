@@ -81,13 +81,6 @@ const Layout = forwardRef(
             }
           }
 
-          layoutElement.current.style.left =
-            Math.floor(
-              orientation === "landscape"
-                ? width / 2 - (targetWidth / 2) * size
-                : width / 2 - (targetHeight / 2) * size,
-            ) + "px";
-
           layoutElement.current.style.top =
             Math.floor(
               orientation === "landscape"
