@@ -25,7 +25,7 @@ export function sleepPausible(delay) {
 export function setTimeoutPausible(
   callback: Function,
   timeout: number,
-  pausible: boolean = true
+  pausible: boolean = true,
 ): CancelFunction {
   timeout = timeout || 0;
   let lastTime = performance.now();
@@ -61,7 +61,7 @@ export function clearTimeoutPausible(cancel: CancelFunction) {
 export function setIntervalPausible(
   callback: Function,
   timeout: number,
-  pausible: boolean = true
+  pausible: boolean = true,
 ): CancelFunction {
   let cancel;
 
@@ -72,7 +72,7 @@ export function setIntervalPausible(
         tick();
       },
       timeout,
-      pausible
+      pausible,
     );
   }
 
@@ -113,7 +113,7 @@ export function setPaused(paused: boolean) {
 setPaused(isPaused);
 
 export function useFramePausibleCanvaslessAsync(
-  callback: (delta: number) => Promise<void>
+  callback: (delta: number) => Promise<void>,
 ) {
   useEffect(() => {
     let cancelledEarly = false;
@@ -151,7 +151,7 @@ export function useFramePausibleCanvasless(callback: (delta: number) => void) {
       }
       animationFrame = requestAnimationFrame(frame);
     };
-    frame();
+    animationFrame = requestAnimationFrame(frame);
     return () => {
       cancelAnimationFrame(animationFrame);
     };
@@ -169,7 +169,7 @@ export function useFrameCanvasless(callback: (delta: number) => void) {
       callback(deltaTime);
       animationFrame = requestAnimationFrame(frame);
     };
-    frame();
+    animationFrame = requestAnimationFrame(frame);
     return () => {
       cancelAnimationFrame(animationFrame);
     };
@@ -178,7 +178,7 @@ export function useFrameCanvasless(callback: (delta: number) => void) {
 
 export function useFramePausible(
   callback: RenderCallback,
-  renderPriority?: number
+  renderPriority?: number,
 ) {
   let i = useRef(0);
   let realDelta = useRef(0);

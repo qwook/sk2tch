@@ -102,8 +102,8 @@ export default function Window(props) {
             lastWindowPosition.current.x +
               (newMousePosition.x - lastMousePosition.current.x) /
                 layoutContext.size,
-            800 - 100
-          )
+            800 - 100,
+          ),
         ),
         y: Math.max(
           0,
@@ -111,8 +111,8 @@ export default function Window(props) {
             lastWindowPosition.current.y +
               (newMousePosition.y - lastMousePosition.current.y) /
                 layoutContext.size,
-            600 - 100
-          )
+            600 - 100,
+          ),
         ),
       });
     }
@@ -157,23 +157,24 @@ export default function Window(props) {
     <div
       className={[
         "window",
-        isVisible ? "pop-up" : "",
+        isVisible ? "pop-up" : "pop-under",
         props.fullscreen ? "fullscreen" : "",
       ].join(" ")}
       style={Object.assign(
         {
           position: "absolute",
           display: "inline-block",
-          visibility: visibleWindows.includes(props.name)
-            ? "visible"
-            : "hidden",
+          visibility:
+            visibleWindows.includes(props.name) || props.fullscreen
+              ? "visible"
+              : "hidden",
           top: position.y * size,
           left: position.x * size,
           background: "#ccc",
           zIndex: zOrder.indexOf(props.name),
           textAlign: "left",
           // overflow: "hidden",
-          border: `${size*2}px solid #245DDA`,
+          border: `${size * 2}px solid #245DDA`,
           borderRadius: 12 * size,
           boxShadow: `${5 * size}px ${5 * size}px ${10 * size}px -${
             5 * size
@@ -181,7 +182,7 @@ export default function Window(props) {
           transform: "translate3d(0,0,0)",
           overflow: "hidden",
         },
-        props.style || {}
+        props.style || {},
       )}
       onMouseDown={(e) => {
         if (zOrder[zOrder.length - 1] !== props.name) {
@@ -351,5 +352,5 @@ export const WindowManager = forwardRef(
         {children}
       </WindowManagerContext.Provider>
     );
-  }
+  },
 );
